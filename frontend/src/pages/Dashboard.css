@@ -1,0 +1,21 @@
+.dashboard-container {
+  display: flex;
+  height: 100vh; /* Altura completa de la vista */
+}
+
+.content {
+  padding: 20px;
+  background-color: #f0f8ff; /* Fondo celeste claro */
+  width: 100%; /* El contenido ocupa el resto del ancho */
+  overflow-y: auto; /* Si el contenido es grande, habilita el scroll */
+}
+
+.content h1 {
+  color: #2b6cb0; /* Azul oscuro */
+  margin-bottom: 20px;
+}
+
+.content p {
+  font-size: 18px;
+  color: #555;
+}
