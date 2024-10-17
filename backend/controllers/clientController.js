@@ -1,8 +1,8 @@
 const Client = require("../models/Client");
 const Shipment = require("../models/Shipment");
 const Receiver = require("../models/Reciver");
+const { Op } = require("sequelize");
 
-// Get all clients with pagination, search and filtering
 const getClients = async (req, res) => {
   try {
     const { page = 1, limit = 10, search } = req.query;
@@ -14,6 +14,7 @@ const getClients = async (req, res) => {
             { firstName: { [Op.like]: `%${search}%` } },
             { lastName: { [Op.like]: `%${search}%` } },
             { email: { [Op.like]: `%${search}%` } },
+            { phone: { [Op.like]: `%${search}%` } }, // Búsqueda por teléfono
           ],
         }
       : {};
@@ -22,7 +23,6 @@ const getClients = async (req, res) => {
       where: whereCondition,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      include: { model: Shipment, as: "shipments" },
     });
 
     res.json({

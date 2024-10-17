@@ -16,6 +16,17 @@ dotenv.config();
 const app = express();
 connectDB();
 
+const syncDatabase = async () => {
+  try {
+    await sequelize.sync({ alter: true }); // Sincroniza los modelos con la base de datos
+    console.log("Database synchronized");
+  } catch (error) {
+    console.error("Error synchronizing the database:", error.message);
+  }
+};
+
+syncDatabase();
+
 // Habilitar CORS y parseo de JSON
 app.use(cors());
 app.use(express.json());

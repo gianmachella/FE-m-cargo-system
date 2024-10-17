@@ -10,8 +10,6 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: "mysql",
-    port: process.env.DB_PORT || 3306,
-    logging: false, // Desactiva los logs SQL (opcional)
   }
 );
 
@@ -20,7 +18,7 @@ const connectDB = async () => {
     await sequelize.authenticate();
     console.log("Database connected successfully");
   } catch (error) {
-    console.error("Database connection failed:", error);
+    console.error("Database connection failed:", error.message);
     process.exit(1);
   }
 };

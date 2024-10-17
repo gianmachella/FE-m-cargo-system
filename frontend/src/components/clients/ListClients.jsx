@@ -5,40 +5,49 @@ import { useGlobalFilter, usePagination, useTable } from "react-table";
 
 import ReactPaginate from "react-paginate";
 
-// Función para buscar clientes desde el backend
 const fetchClients = async (page, search) => {
   const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token"); // Obtener el token
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
   const response = await fetch(
     `http://localhost:5000/api/clients?page=${page}&search=${search || ""}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Incluir el token en el encabezado
+        Authorization: `Bearer ${token}`,
       },
     }
   );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch clients.");
+  }
+
   const data = await response.json();
   return data;
 };
 
 const ListClients = () => {
-  const [clients, setClients] = useState([]); // Valor inicial como array vacío
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState(null);
 
   const loadClients = async () => {
     setLoading(true);
+    setError(null);
+
     try {
       const data = await fetchClients(page + 1, search);
-      setClients(data.data || []); // Asegurarse de que sea un array
+      setClients(data.data || []);
       setTotalPages(data.totalPages || 1);
-    } catch (error) {
-      console.error("Error fetching clients:", error);
-      setClients([]); // En caso de error, asegúrate de que sea un array vacío
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+      setError("Failed to load clients. Please try again.");
+      setClients([]);
     } finally {
       setLoading(false);
     }
@@ -72,7 +81,7 @@ const ListClients = () => {
   );
 
   const tableInstance = useTable(
-    { columns, data: clients }, // Asegúrate de que `data` siempre sea un array
+    { columns, data: clients },
     useGlobalFilter,
     usePagination
   );
@@ -96,10 +105,28 @@ const ListClients = () => {
       "Are you sure you want to delete this client?"
     );
     if (confirmDelete) {
-      await fetch(`http://localhost:5000/api/clients/${clientId}`, {
-        method: "DELETE",
-      });
-      loadClients();
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/clients/${clientId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${
+                localStorage.getItem("token") || sessionStorage.getItem("token")
+              }`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          loadClients();
+        } else {
+          throw new Error("Failed to delete client.");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Error deleting client. Please try again.");
+      }
     }
   };
 
@@ -110,15 +137,17 @@ const ListClients = () => {
       <div className="search-container">
         <input
           type="text"
-          placeholder="Search clients..."
+          placeholder="Search by name, phone, or email..."
           value={search}
           onChange={handleSearch}
         />
       </div>
 
+      {error && <p className="error-message">{error}</p>}
+
       {loading ? (
         <p>Loading clients...</p>
-      ) : (
+      ) : clients.length > 0 ? (
         <table {...getTableProps()} className="clients-table">
           <thead>
             {headerGroups.map((headerGroup) => (
@@ -144,6 +173,8 @@ const ListClients = () => {
             })}
           </tbody>
         </table>
+      ) : (
+        <p>No clients found.</p>
       )}
 
       <ReactPaginate
