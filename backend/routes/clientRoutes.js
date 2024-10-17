@@ -1,16 +1,23 @@
 const express = require("express");
 const {
+  getClients,
   createClient,
-  getAllClients,
-  getClientById,
-  searchClients,
+  updateClient,
+  deleteClient,
+  getShipmentsByClient,
 } = require("../controllers/clientController");
-const authMiddleware = require("../middlewares/authMiddleware");
+const { protect } = require("../middlewares/authMiddleware");
+const { validatePagination } = require("../middlewares/validatePagination"); // Asegúrate de que esta importación sea correcta
+
 const router = express.Router();
 
-router.post("/create", authMiddleware, createClient);
-router.get("/", authMiddleware, getAllClients);
-router.get("/:id", authMiddleware, getClientById);
-router.get("/search", authMiddleware, searchClients);
+router
+  .route("/")
+  .get(protect, validatePagination, getClients) // Utilizando validatePagination como middleware
+  .post(protect, createClient);
+
+router.route("/:id").put(protect, updateClient).delete(protect, deleteClient);
+
+router.route("/:id/shipments").get(protect, getShipmentsByClient);
 
 module.exports = router;

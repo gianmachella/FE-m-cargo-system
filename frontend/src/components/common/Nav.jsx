@@ -2,14 +2,17 @@ import "./Nav.css";
 
 import { BiBell, BiMenu, BiMessageDots, BiUserCircle } from "react-icons/bi";
 
+import Button from "../button/Button";
 import { FaLanguage } from "react-icons/fa6";
 import React from "react";
-import logo from "../../../src/images/logos/logo-hor.png";
-import { useLanguage } from "../../context/Language.context";
+import logo from "../../../src/images/logos/iconwhite.png";
+import { useLanguage } from "../../contexts/Language.context";
+import { useNavigate } from "react-router-dom";
 
 const Nav = (props) => {
   const { collapse } = props;
   const { lan, setLanguage, key } = useLanguage() || {};
+  const navigate = useNavigate();
 
   const languages = [
     {
@@ -57,22 +60,33 @@ const Nav = (props) => {
     },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    navigate("/login"); // Redirige al usuario a la página de login
+  };
+
   return (
     <nav className="row nav-container navbar navbar-light bg-light shadow p-3 mb-5 bg-white rounded">
-      <div className="col-md-12 d-flex flex-row justify-content-between">
+      <div className="nav-container-right">
         {/* Logo y Menú Colapsable */}
         <div className="left-side-nav">
-          <img src={logo} width="150" height="50" className="m-0" alt="Logo" />
+          <img src={logo} width="150" className="m-1" alt="Logo" />
           <div onClick={collapse}>
             <BiMenu className="icon-menu-collapse" />
           </div>
         </div>
+        <Button
+          onClick={handleLogout}
+          className="logout-button"
+          text="LOGOUT"
+          size="extrasmall"
+          color="#1b4965"
+        />
 
         {/* Menús */}
         <div className="menu-nav d-flex flex-row justify-content-around">
-          <div className="d-flex flex-row justify-content-around">
-            <p className="mt-1">John Doe</p>
-          </div>
+          <div className="d-flex flex-row justify-content-around"></div>
         </div>
       </div>
     </nav>

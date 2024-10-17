@@ -1,21 +1,16 @@
-const db = require("../utils/db");
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../config/db"); // Import the Sequelize instance
 
-class Batch {
-  static create(batchData, callback) {
-    const { number, destination, type, userId } = batchData;
-    const query = `INSERT INTO batches (number, destination, type, created_at, user_id) VALUES (?, ?, ?, NOW(), ?)`;
-    db.query(query, [number, destination, type, userId], callback);
-  }
-
-  static findAll(callback) {
-    const query = `SELECT * FROM batches ORDER BY created_at DESC`;
-    db.query(query, callback);
-  }
-
-  static findById(id, callback) {
-    const query = `SELECT * FROM batches WHERE id = ?`;
-    db.query(query, [id], callback);
-  }
-}
+const Batch = sequelize.define("Batch", {
+  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  batchNumber: { type: DataTypes.STRING, allowNull: false },
+  shipments: { type: DataTypes.JSON, allowNull: true }, // Array of shipments
+  destinationCountry: { type: DataTypes.STRING, allowNull: false },
+  status: { type: DataTypes.STRING, allowNull: false },
+  createdBy: { type: DataTypes.INTEGER, allowNull: false },
+  updatedBy: { type: DataTypes.INTEGER, allowNull: false },
+  createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+});
 
 module.exports = Batch;

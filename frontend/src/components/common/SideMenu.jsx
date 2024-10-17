@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 
 import Developer from "../developer/Developer";
 import { Link } from "react-router-dom";
-import { useLanguage } from "../../context/Language.context";
+import { useLanguage } from "../../contexts/Language.context";
 
 const SideMenu = ({ collapsed }) => {
   const { key } = useLanguage();
@@ -104,16 +104,13 @@ const SideMenu = ({ collapsed }) => {
             activeMenu === "customer" ? " submenu-active" : ""
           }`}
         >
-          <Link className="text-item-menu" to="/admin/customer/create-customer">
+          <Link className="text-item-menu" to="/clientes/crear">
             <li className="item-menu-sidebar">
               <BsPeopleFill className="icon-menu" />
               {!collapsedMenu && key?.admin_sidemenu_item_create_user}
             </li>
           </Link>
-          <Link
-            className="text-item-menu"
-            to="/admin/customer/consult-customer"
-          >
+          <Link className="text-item-menu" to="/clientes">
             <li className="item-menu-sidebar">
               <BsPeopleFill className="icon-menu" />
               {!collapsedMenu && key?.admin_sidemenu_item_update_user}

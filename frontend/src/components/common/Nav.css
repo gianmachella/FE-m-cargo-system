@@ -18,13 +18,16 @@
 .nav-container .left-side-nav {
   display: flex;
   align-items: center;
+  width: 90%;
 }
 
 .nav-container img {
+  margin-top: 20px;
   margin-right: 20px;
 }
 
 .icon-menu-collapse {
+  margin-top: 20px;
   font-size: 1.8rem;
   cursor: pointer;
   color: #ffffff;
@@ -33,7 +36,7 @@
 
 .icon-menu-collapse:hover {
   transform: scale(1.1); /* Efecto de agrandamiento al hacer hover */
-  color: #00ff00; /* Color verde como el side menu */
+  color: #afafaf; /* Color verde como el side menu */
 }
 
 .menu-nav {
@@ -113,4 +116,11 @@
     margin-top: 10px;
     flex-direction: column;
   }
+}
+
+.nav-container-right {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }

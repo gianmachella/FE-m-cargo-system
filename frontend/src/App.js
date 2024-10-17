@@ -1,37 +1,103 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
+import { AuthProvider } from "./contexts/AuthContext";
 import CreateBatch from "./components/batches/CreateBatch";
 import CreateClient from "./components/clients/CreateClient";
 import CreateShipment from "./components/shipments/CreateShipment";
 import Dashboard from "./pages/Dashboard";
-import { LanguageProvider } from "./context/Language.context";
+import { LanguageProvider } from "./contexts/Language.context";
 import ListBatches from "./components/batches/ListBatches";
 import ListClients from "./components/clients/ListClients";
 import ListShipments from "./components/shipments/ListShipments";
+import Login from "./components/auth/Login";
 import MainLayout from "./components/layouts/MainLayout"; // Importa el layout
+import PrivateRoute from "./components/privateRoute/PrivateRoute"; // Importa PrivateRoute
 import React from "react";
 
 function App() {
   return (
-    <LanguageProvider>
-      {" "}
-      {/* Proveer el contexto de lenguaje a toda la aplicación */}
-      <Router>
-        <MainLayout>
-          {" "}
-          {/* El menú lateral siempre estará aquí */}
+    <AuthProvider>
+      <LanguageProvider>
+        <Router>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/lotes" element={<ListBatches />} />
-            <Route path="/lotes/crear" element={<CreateBatch />} />
-            <Route path="/clientes" element={<ListClients />} />
-            <Route path="/clientes/crear" element={<CreateClient />} />
-            <Route path="/envios" element={<ListShipments />} />
-            <Route path="/envios/crear" element={<CreateShipment />} />
+            {/* La página de login no tiene el layout */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Las demás rutas utilizan MainLayout para envolverlas */}
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/lotes"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <ListBatches />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/lotes/crear"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <CreateBatch />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/clientes"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <ListClients />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/clientes/crear"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <CreateClient />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/envios"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <ListShipments />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/envios/crear"
+              element={
+                <PrivateRoute>
+                  <MainLayout>
+                    <CreateShipment />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
           </Routes>
-        </MainLayout>
-      </Router>
-    </LanguageProvider>
+        </Router>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
 

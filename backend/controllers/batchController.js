@@ -1,31 +1,75 @@
 const Batch = require("../models/Batch");
 
-exports.createBatch = (req, res) => {
-  const { number, destination, type } = req.body;
-  const userId = req.user.id; // El id del usuario logueado se obtiene del middleware de autenticación
-
-  Batch.create({ number, destination, type, userId }, (err, result) => {
-    if (err) return res.status(500).json({ message: "Error creating batch" });
-    res.status(201).json({
-      message: "Batch created successfully",
-      batchId: result.insertId,
-    });
-  });
+// Get all batches with pagination, search, and filtering
+const getBatches = async (req, res) => {
+  try {
+    const batches = await Batch.findAll();
+    res.json(batches);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.getAllBatches = (req, res) => {
-  Batch.findAll((err, results) => {
-    if (err) return res.status(500).json({ message: "Error fetching batches" });
-    res.status(200).json(results);
-  });
+// Create a new batch
+const createBatch = async (req, res) => {
+  try {
+    const newBatch = await Batch.create(req.body);
+    res.status(201).json(newBatch);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.getBatchById = (req, res) => {
-  const { id } = req.params;
+// Update a batch by ID
+const updateBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const batch = await Batch.findByPk(id);
 
-  Batch.findById(id, (err, result) => {
-    if (err || result.length === 0)
+    if (!batch) {
       return res.status(404).json({ message: "Batch not found" });
-    res.status(200).json(result[0]);
-  });
+    }
+
+    await batch.update(req.body);
+    res.json(batch);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete a batch by ID
+const deleteBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const batch = await Batch.findByPk(id);
+
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found" });
+    }
+
+    await batch.destroy();
+    res.json({ message: "Batch deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get batches by shipment ID
+const getBatchByShipment = async (req, res) => {
+  try {
+    const { shipmentId } = req.params;
+    const batches = await Batch.findAll({ where: { shipmentId } });
+    res.json(batches);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Export all the functions to be used in the routes
+module.exports = {
+  getBatches,
+  createBatch,
+  updateBatch,
+  deleteBatch,
+  getBatchByShipment,
 };

@@ -1,16 +1,27 @@
 const express = require("express");
 const {
+  getShipments,
   createShipment,
-  getAllShipments,
-  getShipmentById,
-  updateShipmentStatus,
+  updateShipment,
+  deleteShipment,
+  getShipmentsByBatch,
 } = require("../controllers/shipmentController");
-const authMiddleware = require("../middlewares/authMiddleware");
+const { protect } = require("../middlewares/authMiddleware");
+const { validatePagination } = require("../middlewares/validatePagination");
 const router = express.Router();
 
-router.post("/create", authMiddleware, createShipment);
-router.get("/", authMiddleware, getAllShipments);
-router.get("/:id", authMiddleware, getShipmentById);
-router.put("/:id/status", authMiddleware, updateShipmentStatus);
+router
+  .route("/")
+  .get(protect, validatePagination, getShipments)
+  .post(protect, createShipment);
+
+router
+  .route("/:id")
+  .put(protect, updateShipment)
+  .delete(protect, deleteShipment);
+
+router
+  .route("/batch/:batchId")
+  .get(protect, validatePagination, getShipmentsByBatch);
 
 module.exports = router;

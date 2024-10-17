@@ -1,0 +1,42 @@
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.input-label {
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.styled-input {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+
+.input-icon {
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+}
+
+.validation-message {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.validation-message.valid {
+  color: green;
+}
+
+.validation-message.invalid {
+  color: red;
+}
