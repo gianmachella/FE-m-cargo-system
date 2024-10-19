@@ -2,6 +2,7 @@ const Client = require("../models/Client");
 const Shipment = require("../models/Shipment");
 const Receiver = require("../models/Receiver");
 const { Op } = require("sequelize");
+const { sequelize } = require("../config/db"); // Asegúrate de que esto esté definido si es necesario para transacciones
 
 const getClients = async (req, res) => {
   try {
@@ -82,6 +83,7 @@ const updateClient = async (req, res) => {
     const { firstName, lastName, phone, email, updatedBy } = req.body;
 
     const client = await Client.findByPk(id);
+
     if (!client) return res.status(404).json({ message: "Client not found" });
 
     client.firstName = firstName;
@@ -147,32 +149,29 @@ const updateClientWithReceivers = async (req, res) => {
   const { id } = req.params;
   const { firstName, lastName, phone, email, receivers } = req.body;
 
-  const transaction = await sequelize.transaction(); // Usa sequelize aquí
+  const transaction = await sequelize.transaction(); // Inicia la transacción
+
   try {
     const client = await Client.findByPk(id);
     if (!client) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
 
-    client.firstName = firstName;
-    client.lastName = lastName;
-    client.phone = phone;
-    client.email = email;
-    await client.save({ transaction });
+    // Actualizar cliente
+    await client.update({ firstName, lastName, phone, email }, { transaction });
 
-    if (receivers && receivers.length > 0) {
-      for (const receiverData of receivers) {
-        const { id: receiverId, ...updatedData } = receiverData;
-        const receiver = await Receiver.findByPk(receiverId);
+    // Actualizar receptores
+    for (const receiverData of receivers) {
+      const { id: receiverId, ...data } = receiverData;
+      const receiver = await Receiver.findByPk(receiverId);
 
-        if (receiver) {
-          await receiver.update(updatedData, { transaction });
-        } else {
-          await Receiver.create(
-            { ...updatedData, clientId: id },
-            { transaction }
-          );
-        }
+      if (receiver) {
+        await receiver.update(data, { transaction });
+      } else {
+        await Receiver.create(
+          { ...data, clientId: client.id },
+          { transaction }
+        );
       }
     }
 
@@ -182,10 +181,8 @@ const updateClientWithReceivers = async (req, res) => {
       .json({ message: "Cliente y receptores actualizados con éxito" });
   } catch (error) {
     await transaction.rollback();
-    console.error("Error al actualizar cliente y receptores:", error);
-    res
-      .status(500)
-      .json({ message: "Error al actualizar cliente y receptores" });
+    console.error("Error al actualizar cliente:", error);
+    res.status(500).json({ message: "Error al actualizar cliente" });
   }
 };
 

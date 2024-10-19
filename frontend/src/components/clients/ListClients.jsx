@@ -73,16 +73,6 @@ const ListClients = () => {
     }
   };
 
-  const handleSaveReceiver = () => {
-    setIsEditingReceiver(false); // Ocultamos el formulario de edición
-    setReceiverIndexToEdit(null); // Limpiamos el índice seleccionado
-    Swal.fire({
-      title: "Guardado",
-      text: "Receptor actualizado con éxito",
-      icon: "success",
-    });
-  };
-
   const fetchReceiversByClientId = async (clientId) => {
     try {
       const token =
@@ -114,18 +104,8 @@ const ListClients = () => {
   };
 
   const handleEdit = async (client) => {
-    setSelectedClient(client);
-
-    const receivers = await fetchReceiversByClientId(client.id);
-    setReceptors(receivers);
-
+    setSelectedClient({ ...client, receivers: client.receivers || [] }); // Asegurar que receivers sea un array
     setIsEditModalOpen(true);
-  };
-
-  const handleView = (client) => {
-    console.log("Viewing client:", client); // Verifica los datos aquí
-    setSelectedClient(client);
-    setIsViewModalOpen(true);
   };
 
   const closeModal = () => {
@@ -179,7 +159,7 @@ const ListClients = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await fetch(
+      const clientResponse = await fetch(
         `http://localhost:5000/api/clients/${selectedClient.id}`,
         {
           method: "PUT",
@@ -187,19 +167,65 @@ const ListClients = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(selectedClient),
+          body: JSON.stringify({
+            firstName: selectedClient.firstName,
+            lastName: selectedClient.lastName,
+            phone: selectedClient.phone,
+            email: selectedClient.email,
+          }),
         }
       );
 
-      if (!response.ok) throw new Error("Error al actualizar cliente.");
+      if (!clientResponse.ok) throw new Error("Error al actualizar cliente.");
 
-      Swal.fire("Éxito", "Cliente actualizado con éxito", "success");
+      // Procesar receptores
+      const receivers = selectedClient.receivers || [];
+
+      for (const receiver of receivers) {
+        if (receiver.id) {
+          await updateReceiver(receiver); // Actualizar receptor existente
+        } else {
+          await createReceiver({ ...receiver, clientId: selectedClient.id }); // Crear receptor nuevo
+        }
+      }
+
+      Swal.fire(
+        "Éxito",
+        "Cliente y receptores actualizados con éxito",
+        "success"
+      );
       setIsEditModalOpen(false);
-      loadClients(); // Recargar lista de clientes
+      loadClients();
     } catch (error) {
       Swal.fire(
         "Error",
         error.message || "No se pudo actualizar el cliente",
+        "error"
+      );
+    }
+  };
+
+  const createReceiver = async (receiver) => {
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const response = await fetch("http://localhost:5000/api/receivers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(receiver), // Asegúrate de que tiene clientId
+      });
+
+      if (!response.ok) throw new Error("Error al crear receptor.");
+
+      Swal.fire("Éxito", "Receptor creado con éxito", "success");
+    } catch (error) {
+      Swal.fire(
+        "Error",
+        error.message || "No se pudo crear el receptor",
         "error"
       );
     }
@@ -214,6 +240,7 @@ const ListClients = () => {
     try {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
+      console.log(receiver);
 
       const response = await fetch(
         `http://localhost:5000/api/receivers/${receiver.id}`,
@@ -257,13 +284,13 @@ const ListClients = () => {
     }
   };
 
-  const handleReceiverChange = (e, field) => {
+  const handleReceiverChange = (index, field, value) => {
     const updatedReceivers = [...receptors];
-    updatedReceivers[receiverIndexToEdit] = {
-      ...updatedReceivers[receiverIndexToEdit],
-      [field]: e.target.value,
+    updatedReceivers[index] = {
+      ...updatedReceivers[index],
+      [field]: value, // Actualiza solo el campo modificado
     };
-    setReceptors(updatedReceivers);
+    setReceptors(updatedReceivers); // Guarda el estado actualizado
   };
 
   useEffect(() => {
@@ -326,18 +353,20 @@ const ListClients = () => {
     setSearch(e.target.value);
     setPage(0);
   };
-
   const addReceptor = () => {
-    setReceptors([
-      ...receptors,
-      {
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-        address: address,
-        country: country,
-      },
-    ]);
+    const newReceiver = {
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
+      address: address,
+      country: country,
+    };
+
+    setSelectedClient((prevClient) => ({
+      ...prevClient,
+      receivers: [...(prevClient.receivers || []), newReceiver],
+    }));
+
     resetReceptorForm();
     setIsNewReceiver(false);
   };
@@ -525,46 +554,91 @@ const ListClients = () => {
                     <Input
                       label="Nombre"
                       placeholder="Nombre"
-                      value={receptors[receiverIndexToEdit]?.firstName || ""}
-                      inputText={receptors[receiverIndexToEdit]?.firstName}
-                      onChange={(e) => handleReceiverChange(e, "nombre")}
+                      value={
+                        receptors[receiverIndexToEdit]?.firstName || firstName
+                      }
+                      inputText={
+                        receptors[receiverIndexToEdit]?.firstName || firstName
+                      }
+                      onChange={(e) =>
+                        handleReceiverChange(
+                          receiverIndexToEdit,
+                          "firstName",
+                          e.target.value
+                        )
+                      }
                     />
                     <Input
                       label="Apellido"
                       placeholder="Apellido"
-                      value={receptors[receiverIndexToEdit]?.lastName || ""}
-                      inputText={receptors[receiverIndexToEdit]?.lastName}
-                      onChange={(e) => handleReceiverChange(e, "apellido")}
+                      value={
+                        receptors[receiverIndexToEdit]?.lastName || lastName
+                      }
+                      inputText={
+                        receptors[receiverIndexToEdit]?.lastName || lastName
+                      }
+                      onChange={(e) =>
+                        handleReceiverChange(
+                          receiverIndexToEdit,
+                          "lastName",
+                          e.target.value
+                        )
+                      }
                     />
                     <Input
                       label="Teléfono"
                       placeholder="Teléfono"
-                      value={receptors[receiverIndexToEdit]?.phone || ""}
-                      inputText={receptors[receiverIndexToEdit]?.phone}
-                      onChange={(e) => handleReceiverChange(e, "telefono")}
+                      value={receptors[receiverIndexToEdit]?.phone || phone}
+                      inputText={receptors[receiverIndexToEdit]?.phone || phone}
+                      onChange={(e) =>
+                        handleReceiverChange(
+                          receiverIndexToEdit,
+                          "phone",
+                          e.target.value
+                        )
+                      }
                     />
                     <Input
                       label="Dirección"
                       placeholder="Dirección"
-                      value={receptors[receiverIndexToEdit]?.address || ""}
-                      inputText={receptors[receiverIndexToEdit]?.address}
-                      onChange={(e) => handleReceiverChange(e, "direccion")}
+                      value={receptors[receiverIndexToEdit]?.address || address}
+                      inputText={
+                        receptors[receiverIndexToEdit]?.address || address
+                      }
+                      onChange={(e) =>
+                        handleReceiverChange(
+                          receiverIndexToEdit,
+                          "address",
+                          e.target.value
+                        )
+                      }
                     />
                     <Select
                       label="País"
-                      value={receptors[receiverIndexToEdit]?.country || ""}
-                      inputText={receptors[receiverIndexToEdit]?.country}
-                      onChange={(e) => handleReceiverChange(e, "pais")}
+                      value={receptors[receiverIndexToEdit]?.country || country}
+                      inputText={
+                        receptors[receiverIndexToEdit]?.country || country
+                      }
+                      onChange={(e) =>
+                        handleReceiverChange(
+                          receiverIndexToEdit,
+                          "country",
+                          e.target.value
+                        )
+                      }
                       options={[
                         { label: "Venezuela", value: "ven" },
                         { label: "Colombia", value: "col" },
                         { label: "Ecuador", value: "ecu" },
                       ]}
                     />
+
                     <div className="button-receptor-edit">
                       <Button
                         text="Guardar Cambios"
-                        onClick={() => handleSaveReceiver()}
+                        onClick={() =>
+                          updateReceiver(receptors[receiverIndexToEdit])
+                        }
                         size="small"
                         color={"#57cc99"}
                       />

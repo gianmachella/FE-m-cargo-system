@@ -1,12 +1,11 @@
-const Receptor = require("../models/Receiver");
-
+const Receiver = require("../models/Receiver");
 // Asegúrate de que esta función esté definida correctamente
 const getReceptorsByClientId = async (req, res) => {
-  const { clientId } = req.params;
+  const { clientId } = req.params; // Extrae el ID del cliente desde los parámetros de la solicitud.
 
   try {
-    const receivers = await Receptor.findAll({
-      where: { clientId }, // Filtra por clientId
+    const receivers = await Receiver.findAll({
+      where: { clientId }, // Verifica que se esté usando el `clientId` como filtro.
     });
 
     if (receivers.length === 0) {
@@ -64,22 +63,24 @@ const updateReceiver = async (req, res) => {
     const { id } = req.params;
     const { firstName, lastName, phone, address, country } = req.body;
 
-    const receiver = await Receptor.findByPk(id);
+    const receiver = await Receiver.findByPk(id);
     if (!receiver) {
       return res.status(404).json({ message: "Receptor no encontrado" });
     }
 
+    // Actualizamos los datos del receptor
     receiver.firstName = firstName;
     receiver.lastName = lastName;
     receiver.phone = phone;
     receiver.address = address;
     receiver.country = country;
 
-    await receiver.save();
+    await receiver.save(); // Guardamos los cambios en la base de datos
+
     return res.status(200).json({ message: "Receptor actualizado", receiver });
   } catch (error) {
-    console.error("Error al actualizar el receptor:", error);
-    return res.status(500).json({ message: "Error al actualizar el receptor" });
+    console.error("Error al actualizar receptor:", error);
+    return res.status(500).json({ message: "Error al actualizar receptor" });
   }
 };
 

@@ -1,4 +1,3 @@
-// models/Receiver.js
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 
@@ -9,23 +8,23 @@ const Receiver = sequelize.define("Receiver", {
     primaryKey: true,
   },
   firstName: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   lastName: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   phone: {
-    type: DataTypes.STRING(20),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   address: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   country: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   clientId: {

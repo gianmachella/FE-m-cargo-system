@@ -1,7 +1,7 @@
 import "./Login.css";
 
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Íconos para mostrar/ocultar contraseña
-import React, { useContext, useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import React, { useContext, useEffect, useState } from "react";
 
 import { AuthContext } from "../../contexts/AuthContext";
 import Logo from "../../images/logos/logo.png";
@@ -12,12 +12,24 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [company, setCompany] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(
+    localStorage.getItem("rememberMe") === "true" // Verificar opción guardada
+  );
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Estado para alternar visibilidad de contraseña
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirigir si ya hay un token activo
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (token) {
+      login(token);
+      navigate("/"); // Redirige al dashboard u otra ruta segura
+    }
+  }, [login, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,13 +47,16 @@ const Login = () => {
       if (response.ok) {
         const token = data.token;
 
+        // Guardar token en el almacenamiento correcto según la opción "remember me"
         if (rememberMe) {
           localStorage.setItem("token", token);
+          localStorage.setItem("rememberMe", "true"); // Guardar preferencia
         } else {
           sessionStorage.setItem("token", token);
+          localStorage.setItem("rememberMe", "false");
         }
 
-        login(token);
+        login(token); // Actualiza el contexto de autenticación
 
         Swal.fire({
           icon: "success",
@@ -91,7 +106,7 @@ const Login = () => {
 
           <div className="input-group password-group">
             <input
-              type={showPassword ? "text" : "password"} // Alterna tipo de input
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
