@@ -1,3 +1,4 @@
+// src/App.js
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 import { AuthProvider } from "./contexts/AuthContext";
@@ -10,94 +11,87 @@ import ListBatches from "./components/batches/ListBatches";
 import ListClients from "./components/clients/ListClients";
 import ListShipments from "./components/shipments/ListShipments";
 import Login from "./components/auth/Login";
-import MainLayout from "./components/layouts/MainLayout"; // Importa el layout
-import PrivateRoute from "./components/privateRoute/PrivateRoute"; // Importa PrivateRoute
-import React from "react";
+import MainLayout from "./components/layouts/MainLayout";
+import PrivateRoute from "./components/privateRoute/PrivateRoute";
 
 function App() {
   return (
-    <AuthProvider>
-      <LanguageProvider>
-        <Router>
+    <LanguageProvider>
+      <Router>
+        {/* AuthProvider ahora está dentro de Router */}
+        <AuthProvider>
           <Routes>
-            {/* La página de login no tiene el layout */}
             <Route path="/login" element={<Login />} />
-
-            {/* Las demás rutas utilizan MainLayout para envolverlas */}
-            <Route
-              path="/"
-              element={
-                <PrivateRoute>
+            <Route element={<PrivateRoute />}>
+              <Route
+                path="/"
+                element={
                   <MainLayout>
                     <Dashboard />
                   </MainLayout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/lotes"
-              element={
-                <PrivateRoute>
+                }
+              />
+              <Route
+                path="/lotes"
+                element={
                   <MainLayout>
                     <ListBatches />
                   </MainLayout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/lotes/crear"
-              element={
-                <PrivateRoute>
+                }
+              />
+              <Route
+                path="/lotes/crear"
+                element={
                   <MainLayout>
                     <CreateBatch />
                   </MainLayout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/clientes"
-              element={
-                <PrivateRoute>
+                }
+              />
+              <Route
+                path="/clientes"
+                element={
                   <MainLayout>
                     <ListClients />
                   </MainLayout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/clientes/crear"
-              element={
-                <PrivateRoute>
+                }
+              />
+              <Route
+                path="/clientes/crear"
+                element={
                   <MainLayout>
                     <CreateClient />
                   </MainLayout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/envios"
-              element={
-                <PrivateRoute>
+                }
+              />
+              <Route
+                path="/clients/edit/:clientId"
+                element={
+                  <MainLayout>
+                    <CreateClient />
+                  </MainLayout>
+                }
+              />
+              <Route
+                path="/envios"
+                element={
                   <MainLayout>
                     <ListShipments />
                   </MainLayout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/envios/crear"
-              element={
-                <PrivateRoute>
+                }
+              />
+              <Route
+                path="/envios/crear"
+                element={
                   <MainLayout>
                     <CreateShipment />
                   </MainLayout>
-                </PrivateRoute>
-              }
-            />
+                }
+              />
+            </Route>
           </Routes>
-        </Router>
-      </LanguageProvider>
-    </AuthProvider>
+        </AuthProvider>
+      </Router>
+    </LanguageProvider>
   );
 }
 

@@ -31,6 +31,11 @@
   font-weight: bold;
 }
 
+.action-buttons {
+  display: flex;
+  justify-content: center;
+}
+
 .action-buttons button {
   margin-right: 5px;
   padding: 5px 10px;
@@ -72,4 +77,116 @@
   background-color: #4caf50;
   color: white;
   border: 1px solid #4caf50;
+}
+.clients-table {
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.search-container input {
+  margin: 10px 0;
+}
+/* CreateClient.css */
+
+/* Oculta la modal por defecto */
+.modal {
+  opacity: 0;
+  transform: translateY(-50px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Estado cuando la modal está visible */
+.modal--open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Overlay (fondo oscuro detrás de la modal) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 999;
+  overflow-y: scroll; /* Activa el scroll vertical */
+  scrollbar-width: none;
+}
+
+/* Cuando el overlay está activo */
+.modal-overlay--open {
+  opacity: 1;
+}
+
+.modal::-webkit-scrollbar {
+  display: none;
+}
+
+/* Overlay para el fondo oscuro */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 999;
+}
+
+.modal-overlay--open {
+  opacity: 1;
+}
+
+.form-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.form-wrapper-horizontal {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+/* Asegura que cada sección tenga el mismo tamaño */
+.client-section,
+.receptor-section {
+  flex: 1;
+  min-width: 40%;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Alinea los botones de guardar */
+.button-save {
+  width: 100%;
+  padding: 25px 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.receptor-edit {
+  margin-top: 15px;
+}
+
+.receptor-item {
+  margin: 0;
+}
+
+.button-receptor-edit {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
 }

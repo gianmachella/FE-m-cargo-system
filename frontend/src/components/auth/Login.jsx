@@ -1,8 +1,11 @@
 import "./Login.css";
 
-import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Íconos para mostrar/ocultar contraseña
+import React, { useContext, useState } from "react";
 
+import { AuthContext } from "../../contexts/AuthContext";
 import Logo from "../../images/logos/logo.png";
+import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -10,13 +13,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [company, setCompany] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar la contraseña
+  const [showPassword, setShowPassword] = useState(false); // Estado para alternar visibilidad de contraseña
 
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Función para manejar el submit del formulario de login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -24,109 +26,98 @@ const Login = () => {
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, company, rememberMe }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        const token = data.token;
+
         if (rememberMe) {
-          localStorage.setItem("token", data.token);
+          localStorage.setItem("token", token);
         } else {
-          sessionStorage.setItem("token", data.token);
+          sessionStorage.setItem("token", token);
         }
 
-        navigate("/"); // Redirige al usuario a la página de inicio
+        login(token);
+
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful",
+          text: "Welcome!",
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => navigate("/"));
       } else {
-        setError(data.message || "Login failed. Please try again.");
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: data.message || "Invalid credentials. Please try again.",
+        });
       }
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para cerrar sesión
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    navigate("/login"); // Redirige al usuario a la página de login
-  };
-
-  // Alternar mostrar/ocultar contraseña
   const toggleShowPassword = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
+    setShowPassword((prevState) => !prevState);
   };
 
   return (
     <div className="login-container">
       <div className="login-box">
         <div className="login-header">
-          <img className="logo-login" src={Logo} alt="" />
+          <img className="logo-login" src={Logo} alt="Logo" />
         </div>
         <form onSubmit={handleSubmit} className="login-form">
-          {error && <p className="error-message">{error}</p>}
           <div className="input-group">
-            <i className="fas fa-user input-icon"></i>
             <input
               type="email"
-              placeholder="Email ID"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="input-group">
-            <i className="fas fa-lock input-icon"></i>
+
+          <div className="input-group password-group">
             <input
-              type={showPassword ? "text" : "password"} // Cambia el tipo de input para mostrar/ocultar contraseña
+              type={showPassword ? "text" : "password"} // Alterna tipo de input
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <i
-              className={`fas ${
-                showPassword ? "fa-eye-slash" : "fa-eye"
-              } input-icon`} // Ícono de mostrar/ocultar contraseña
-              onClick={toggleShowPassword}
-              style={{ cursor: "pointer" }}
-            ></i>
+            <span className="toggle-password" onClick={toggleShowPassword}>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
+
           <div className="input-group">
-            <i className="fas fa-building input-icon"></i>
             <select
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               required
             >
-              <option value="">Select Company</option>
-              <option value="company1">Company 1</option>
-              <option value="company2">Company 2</option>
-              <option value="company3">Company 3</option>
+              <option value="">Selecciona una Compañía</option>
+              <option value="company1">Global Cargo</option>
             </select>
           </div>
-          <div className="remember-me">
-            <div>
-              <input
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
-              />
-              <label htmlFor="rememberMe">Remember me</label>
-            </div>
-            <a href="#" className="forgot-password">
-              Forgot Password?
-            </a>
+
+          <div className="input-group">
+            <button className="login-button" type="submit" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
+            </button>
           </div>
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? "Logging in..." : "LOGIN"}
-          </button>
         </form>
       </div>
     </div>

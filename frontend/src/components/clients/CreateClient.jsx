@@ -9,7 +9,9 @@ import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
 
-const CreateClient = ({ onSave }) => {
+const CreateClient = (props) => {
+  const { clientData } = props;
+
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -28,6 +30,8 @@ const CreateClient = ({ onSave }) => {
   const [receptorErrors, setReceptorErrors] = useState({});
   const [loading, setLoading] = useState(false); // Para manejar el estado de carga
   const [successMessage, setSuccessMessage] = useState(""); // Para manejar mensajes de éxito
+
+  console.log("Data", clientData);
 
   const countryOptions = [
     { label: "Venezuela", value: "ven" },

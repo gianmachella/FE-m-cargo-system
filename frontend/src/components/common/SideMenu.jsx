@@ -113,7 +113,7 @@ const SideMenu = ({ collapsed }) => {
           <Link className="text-item-menu" to="/clientes">
             <li className="item-menu-sidebar">
               <BsPeopleFill className="icon-menu" />
-              {!collapsedMenu && key?.admin_sidemenu_item_update_user}
+              Ver Clientes
             </li>
           </Link>
         </ul>
@@ -132,7 +132,7 @@ const SideMenu = ({ collapsed }) => {
       {/* Pie de página */}
       {!collapsedMenu && (
         <div className="menu-footer">
-          <p className="program-name">M-Cargo V-1.0</p>
+          <p className="program-name">Global Control V-1.0</p>
           <p className="developer-name">Desarrollado por Gian Machella</p>
           <Developer />
         </div>

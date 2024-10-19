@@ -19,6 +19,7 @@ const Input = ({
   onChange = () => {},
   isValid = true,
   name = "",
+  disabled = false,
 }) => {
   const [inputValue, setInputValue] = useState(inputText);
   const [valid, setValid] = useState(isValid);
@@ -60,6 +61,7 @@ const Input = ({
           value={inputValue}
           onChange={handleChange}
           name={name}
+          disabled={disabled}
         />
         {trailingIcon && <span className="input-icon">{trailingIcon}</span>}
       </div>

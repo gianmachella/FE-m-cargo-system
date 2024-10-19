@@ -4,21 +4,15 @@ import { FormContainer, FormSection } from "../components/form/Form";
 
 import Input from "../components/inputs/InputComponent";
 import React from "react";
+import logo from "../images/logos/logo-hor.png";
 
 const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <div className="content">
-        <h1>Bienvenido al Sistema M-Cargo</h1>
+        <h1>Bienvenidos</h1>
+        <img src={logo} />
         <p>Selecciona una opción del menú para empezar.</p>
-        <FormContainer>
-          <FormSection title="Datos personales">
-            <Input label="Prueba" borderRadius={5} placeholder={"Escrime"} />
-            <Input label="Prueba" borderRadius={5} placeholder={"Escrime"} />
-            <Input label="Prueba" borderRadius={5} placeholder={"Escrime"} />
-            <Input label="Prueba" borderRadius={5} placeholder={"Escrime"} />
-          </FormSection>
-        </FormContainer>
       </div>
     </div>
   );

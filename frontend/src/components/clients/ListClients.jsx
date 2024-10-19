@@ -1,9 +1,20 @@
+// ListClients.js
 import "./ListClients.css";
 
+import { FaPen, FaTrashCan } from "react-icons/fa6";
+import { FormContainer, FormSection } from "../form/Form";
 import React, { useEffect, useMemo, useState } from "react";
 import { useGlobalFilter, usePagination, useTable } from "react-table";
 
+import Button from "../button/Button";
+import Input from "../inputs/InputComponent";
+import Modal from "react-modal"; // Modal para editar/ver clientes
 import ReactPaginate from "react-paginate";
+import Select from "../select/SelectComponent";
+import Swal from "sweetalert2"; // SweetAlert para mensajes
+import { useNavigate } from "react-router-dom";
+
+Modal.setAppElement("#root");
 
 const fetchClients = async (page, search) => {
   const token =
@@ -20,12 +31,9 @@ const fetchClients = async (page, search) => {
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch clients.");
-  }
+  if (!response.ok) throw new Error("Failed to fetch clients.");
 
-  const data = await response.json();
-  return data;
+  return await response.json();
 };
 
 const ListClients = () => {
@@ -35,6 +43,203 @@ const ListClients = () => {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState(null);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [receptors, setReceptors] = useState([]);
+
+  const [isEditingReceiver, setIsEditingReceiver] = useState(false);
+  const [isNewReceiver, setIsNewReceiver] = useState(false);
+  const [receiverIndexToEdit, setReceiverIndexToEdit] = useState(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [country, setCountry] = useState("");
+
+  const [receptorErrors, setReceptorErrors] = useState({});
+
+  const handleEditReceiver = (index) => {
+    if (receptors[index]) {
+      setReceiverIndexToEdit(index); // Guardamos el índice del receptor
+      setIsEditingReceiver(true); // Mostramos el formulario de edición
+    } else {
+      console.error("El receptor seleccionado no existe.");
+      Swal.fire("Error", "El receptor seleccionado no existe", "error");
+    }
+  };
+
+  const handleSaveReceiver = () => {
+    setIsEditingReceiver(false); // Ocultamos el formulario de edición
+    setReceiverIndexToEdit(null); // Limpiamos el índice seleccionado
+    Swal.fire({
+      title: "Guardado",
+      text: "Receptor actualizado con éxito",
+      icon: "success",
+    });
+  };
+
+  const fetchReceiversByClientId = async (clientId) => {
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/clients/${clientId}/receivers`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al obtener los receptores.");
+      }
+
+      const data = await response.json();
+      console.log("Receptores del cliente:", data);
+      return data;
+    } catch (error) {
+      console.error("Error al cargar los receptores:", error);
+      Swal.fire("Error", "No se pudieron cargar los receptores", "error");
+      return [];
+    }
+  };
+
+  const handleEdit = async (client) => {
+    setSelectedClient(client);
+
+    const receivers = await fetchReceiversByClientId(client.id);
+    setReceptors(receivers);
+
+    setIsEditModalOpen(true);
+  };
+
+  const handleView = (client) => {
+    console.log("Viewing client:", client); // Verifica los datos aquí
+    setSelectedClient(client);
+    setIsViewModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedClient(null);
+    setIsEditModalOpen(false);
+    setIsViewModalOpen(false);
+  };
+
+  const handleDelete = async (clientId) => {
+    const confirmDelete = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (confirmDelete.isConfirmed) {
+      try {
+        const token =
+          localStorage.getItem("token") || sessionStorage.getItem("token");
+        const response = await fetch(
+          `http://localhost:5000/api/clients/${clientId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          await loadClients();
+          Swal.fire("Deleted!", "Client has been deleted.", "success");
+        } else {
+          throw new Error("Failed to delete client.");
+        }
+      } catch (error) {
+        Swal.fire("Error", "Error deleting client. Please try again.", "error");
+      }
+    }
+  };
+
+  const updateClient = async () => {
+    if (!selectedClient.firstName || !selectedClient.email) {
+      Swal.fire("Error", "Nombre y Email son obligatorios", "error");
+      return;
+    }
+
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/clients/${selectedClient.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(selectedClient),
+        }
+      );
+
+      if (!response.ok) throw new Error("Error al actualizar cliente.");
+
+      Swal.fire("Éxito", "Cliente actualizado con éxito", "success");
+      setIsEditModalOpen(false);
+      loadClients(); // Recargar lista de clientes
+    } catch (error) {
+      Swal.fire(
+        "Error",
+        error.message || "No se pudo actualizar el cliente",
+        "error"
+      );
+    }
+  };
+
+  const updateReceiver = async (receiver) => {
+    if (!receiver || !receiver.firstName || !receiver.phone) {
+      Swal.fire("Error", "Nombre y Teléfono son obligatorios", "error");
+      return;
+    }
+
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/receivers/${receiver.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(receiver),
+        }
+      );
+
+      if (!response.ok) throw new Error("Error al actualizar receptor.");
+
+      Swal.fire("Éxito", "Receptor actualizado con éxito", "success");
+      setIsEditingReceiver(false);
+      loadClients(); // Recargar lista de clientes
+    } catch (error) {
+      Swal.fire(
+        "Error",
+        error.message || "No se pudo actualizar el receptor",
+        "error"
+      );
+    }
+  };
 
   const loadClients = async () => {
     setLoading(true);
@@ -45,13 +250,27 @@ const ListClients = () => {
       setClients(data.data || []);
       setTotalPages(data.totalPages || 1);
     } catch (err) {
-      console.error("Error fetching clients:", err);
       setError("Failed to load clients. Please try again.");
       setClients([]);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleReceiverChange = (e, field) => {
+    const updatedReceivers = [...receptors];
+    updatedReceivers[receiverIndexToEdit] = {
+      ...updatedReceivers[receiverIndexToEdit],
+      [field]: e.target.value,
+    };
+    setReceptors(updatedReceivers);
+  };
+
+  useEffect(() => {
+    if (selectedClient) {
+      fetchReceiversByClientId(selectedClient.id).then(setReceptors);
+    }
+  }, [selectedClient]);
 
   useEffect(() => {
     loadClients();
@@ -69,10 +288,22 @@ const ListClients = () => {
         accessor: "actions",
         Cell: ({ row }) => (
           <div className="action-buttons">
-            <button onClick={() => handleEdit(row.original)}>Edit</button>
-            <button onClick={() => handleDelete(row.original.id)}>
-              Delete
-            </button>
+            <Button
+              shape="circular"
+              size="extrasmall"
+              icon={<FaPen />}
+              iconPosition="center"
+              color="#4cc9f0"
+              onClick={() => handleEdit(row.original)}
+            />
+            <Button
+              shape="circular"
+              size="extrasmall"
+              icon={<FaTrashCan />}
+              iconPosition="center"
+              color="#ef233c"
+              onClick={() => handleDelete(row.original.id)}
+            />
           </div>
         ),
       },
@@ -93,53 +324,44 @@ const ListClients = () => {
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
-    setPage(0); // Reinicia la paginación al buscar
+    setPage(0);
   };
 
-  const handleEdit = (client) => {
-    console.log("Edit client:", client);
+  const addReceptor = () => {
+    setReceptors([
+      ...receptors,
+      {
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        address: address,
+        country: country,
+      },
+    ]);
+    resetReceptorForm();
+    setIsNewReceiver(false);
   };
 
-  const handleDelete = async (clientId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this client?"
-    );
-    if (confirmDelete) {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/clients/${clientId}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${
-                localStorage.getItem("token") || sessionStorage.getItem("token")
-              }`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          loadClients();
-        } else {
-          throw new Error("Failed to delete client.");
-        }
-      } catch (error) {
-        console.error(error);
-        alert("Error deleting client. Please try again.");
-      }
-    }
+  const resetReceptorForm = () => {
+    setFirstName("");
+    setLastName("");
+    setPhone("");
+    setAddress("");
+    setCountry("");
+    setReceptorErrors({});
   };
 
   return (
     <div className="list-clients-container">
-      <h1>Clients List</h1>
+      <h1>Clientes Registrados</h1>
 
       <div className="search-container">
         <input
           type="text"
-          placeholder="Search by name, phone, or email..."
+          placeholder="Busca por nombre, telefono o email..."
           value={search}
           onChange={handleSearch}
+          style={{ width: "300px" }} // Ajuste del ancho del input
         />
       </div>
 
@@ -151,9 +373,9 @@ const ListClients = () => {
         <table {...getTableProps()} className="clients-table">
           <thead>
             {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
+              <tr key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()}>
+                  <th key={column.id} {...column.getHeaderProps()}>
                     {column.render("Header")}
                   </th>
                 ))}
@@ -164,9 +386,11 @@ const ListClients = () => {
             {rows.map((row) => {
               prepareRow(row);
               return (
-                <tr {...row.getRowProps()}>
+                <tr key={row.id} {...row.getRowProps()}>
                   {row.cells.map((cell) => (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                    <td key={cell.column.id} {...cell.getCellProps()}>
+                      {cell.render("Cell")}
+                    </td>
                   ))}
                 </tr>
               );
@@ -188,6 +412,275 @@ const ListClients = () => {
         containerClassName={"pagination"}
         activeClassName={"active"}
       />
+
+      <Modal
+        isOpen={isEditModalOpen}
+        onRequestClose={closeModal}
+        className={`modal ${isEditModalOpen ? "modal--open" : ""}`}
+        overlayClassName={`modal-overlay ${
+          isEditModalOpen ? "modal-overlay--open" : ""
+        }`}
+      >
+        {selectedClient ? (
+          <FormContainer>
+            <h1>{isEditing ? "Editar Cliente" : "Ver Cliente"}</h1>
+            <div className="form-wrapper-horizontal">
+              <div className="client-section">
+                <FormSection title={isEditing ? "Editar Cliente" : "Cliente"}>
+                  <Input
+                    disabled={!isEditing}
+                    label="Nombre"
+                    placeholder="Nombre"
+                    value={selectedClient.firstName || ""}
+                    inputText={selectedClient.firstName}
+                    onChange={(e) =>
+                      setSelectedClient({
+                        ...selectedClient,
+                        firstName: e.target.value,
+                      })
+                    }
+                  />
+                  <Input
+                    disabled={!isEditing}
+                    label="Apellido"
+                    placeholder="Apellido"
+                    value={selectedClient.lastName || ""}
+                    inputText={selectedClient.lastName}
+                    onChange={(e) =>
+                      setSelectedClient({
+                        ...selectedClient,
+                        lastName: e.target.value,
+                      })
+                    }
+                  />
+                  <Input
+                    disabled={!isEditing}
+                    label="Teléfono"
+                    placeholder="Teléfono"
+                    value={selectedClient.phone || ""}
+                    inputText={selectedClient.phone}
+                    onChange={(e) =>
+                      setSelectedClient({
+                        ...selectedClient,
+                        phone: e.target.value,
+                      })
+                    }
+                  />
+                  <Input
+                    disabled={!isEditing}
+                    label="Email"
+                    placeholder="Email"
+                    value={selectedClient.email || ""}
+                    inputText={selectedClient.email}
+                    onChange={(e) =>
+                      setSelectedClient({
+                        ...selectedClient,
+                        email: e.target.value,
+                      })
+                    }
+                  />
+                </FormSection>
+              </div>
+
+              <div className="receptor-section">
+                <div className="receptor-list">
+                  <h3>Receptores</h3>
+                  {receptors.length > 0 ? (
+                    receptors.map((receptor, index) => (
+                      <div key={index} className="receptor-item">
+                        <p>
+                          {receptor.firstName} {receptor.lastName} -{" "}
+                          {receptor.phone}
+                        </p>
+                        {isEditing && (
+                          <div className="receptor-edit">
+                            <Button
+                              onClick={() => handleEditReceiver(index)}
+                              size="extrasmall"
+                              color="#00b4d8"
+                              shape="circular"
+                              iconPosition="center"
+                              icon={<FaPen />}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay receptores registrados.</p>
+                  )}
+                  {isEditing && !isNewReceiver && (
+                    <Button
+                      onClick={() => setIsNewReceiver(true)}
+                      size="small"
+                      color="#00b4d8"
+                      text="Nuevo"
+                    />
+                  )}
+                </div>
+                {isEditingReceiver && (
+                  <FormSection
+                    title={isNewReceiver ? "Nuevo Receptor" : "Editar Receptor"}
+                  >
+                    <Input
+                      label="Nombre"
+                      placeholder="Nombre"
+                      value={receptors[receiverIndexToEdit]?.firstName || ""}
+                      inputText={receptors[receiverIndexToEdit]?.firstName}
+                      onChange={(e) => handleReceiverChange(e, "nombre")}
+                    />
+                    <Input
+                      label="Apellido"
+                      placeholder="Apellido"
+                      value={receptors[receiverIndexToEdit]?.lastName || ""}
+                      inputText={receptors[receiverIndexToEdit]?.lastName}
+                      onChange={(e) => handleReceiverChange(e, "apellido")}
+                    />
+                    <Input
+                      label="Teléfono"
+                      placeholder="Teléfono"
+                      value={receptors[receiverIndexToEdit]?.phone || ""}
+                      inputText={receptors[receiverIndexToEdit]?.phone}
+                      onChange={(e) => handleReceiverChange(e, "telefono")}
+                    />
+                    <Input
+                      label="Dirección"
+                      placeholder="Dirección"
+                      value={receptors[receiverIndexToEdit]?.address || ""}
+                      inputText={receptors[receiverIndexToEdit]?.address}
+                      onChange={(e) => handleReceiverChange(e, "direccion")}
+                    />
+                    <Select
+                      label="País"
+                      value={receptors[receiverIndexToEdit]?.country || ""}
+                      inputText={receptors[receiverIndexToEdit]?.country}
+                      onChange={(e) => handleReceiverChange(e, "pais")}
+                      options={[
+                        { label: "Venezuela", value: "ven" },
+                        { label: "Colombia", value: "col" },
+                        { label: "Ecuador", value: "ecu" },
+                      ]}
+                    />
+                    <div className="button-receptor-edit">
+                      <Button
+                        text="Guardar Cambios"
+                        onClick={() => handleSaveReceiver()}
+                        size="small"
+                        color={"#57cc99"}
+                      />
+                      <Button
+                        text="Cancelar"
+                        onClick={() => {
+                          setIsEditingReceiver(false);
+                          setIsNewReceiver(false);
+                        }}
+                        size="small"
+                        color="#e63946"
+                        textColor="white"
+                      />
+                    </div>
+                  </FormSection>
+                )}
+                {isNewReceiver && (
+                  <FormSection
+                    title={isNewReceiver ? "Nuevo Receptor" : "Editar Receptor"}
+                  >
+                    <Input
+                      label="Nombre"
+                      placeholder="Nombre"
+                      value={firstName}
+                      inputText={firstName}
+                      onChange={(e) => setFirstName(e.target.value)} // Cambiar a e.target.value
+                    />
+                    <Input
+                      label="Apellido"
+                      placeholder="Apellido"
+                      value={lastName}
+                      inputText={lastName}
+                      onChange={(e) => setLastName(e.target.value)} // Cambiar a e.target.value
+                    />
+                    <Input
+                      label="Teléfono"
+                      placeholder="Teléfono"
+                      value={phone}
+                      inputText={phone}
+                      onChange={(e) => setPhone(e.target.value)} // Cambiar a e.target.value
+                    />
+                    <Input
+                      label="Dirección"
+                      placeholder="Dirección"
+                      value={address}
+                      inputText={address}
+                      onChange={(e) => setAddress(e.target.value)} // Cambiar a e.target.value
+                    />
+                    <Select
+                      label="País"
+                      value={country}
+                      inputText={country}
+                      onChange={(e) => setCountry(e.target.value)} // Cambiar a e.target.value
+                      options={[
+                        { label: "Venezuela", value: "ven" },
+                        { label: "Colombia", value: "col" },
+                        { label: "Ecuador", value: "ecu" },
+                      ]}
+                    />
+
+                    <div className="button-receptor-edit">
+                      <Button
+                        text="Agregar"
+                        onClick={() => addReceptor()}
+                        size="small"
+                        color={isNewReceiver ? "#4cc9f0" : "#57cc99"}
+                      />
+                      <Button
+                        text="Cancelar"
+                        onClick={() => {
+                          setIsEditingReceiver(false);
+                          setIsNewReceiver(false);
+                        }}
+                        size="small"
+                        color="#e63946"
+                        textColor="white"
+                      />
+                    </div>
+                  </FormSection>
+                )}
+              </div>
+            </div>
+            <div className="button-save">
+              <Button
+                text={isEditing ? "Guardar Cambios" : "Editar"}
+                onClick={() => {
+                  if (isEditing) {
+                    updateClient();
+                    updateReceiver(receptors[receiverIndexToEdit]);
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
+                size="medium"
+                color="#57cc99"
+              />
+              <Button
+                text={isEditing ? "Cancelar" : "Cerrar"}
+                onClick={() => {
+                  if (isEditing) {
+                    setIsEditing(false);
+                    setIsNewReceiver(false);
+                  } else {
+                    closeModal();
+                  }
+                }}
+                size="medium"
+                color={isEditing ? "#fbfbfb" : "#e63946"}
+                textColor={isEditing ? "black" : "white"}
+              />
+            </div>
+          </FormContainer>
+        ) : (
+          <p>Cargando datos del cliente...</p>
+        )}
+      </Modal>
     </div>
   );
 };
