@@ -99,17 +99,24 @@ const updateClient = async (req, res) => {
   }
 };
 
-// Delete client by ID
 const deleteClient = async (req, res) => {
+  const { id } = req.params;
+
+  const transaction = await Client.sequelize.transaction();
   try {
-    const { id } = req.params;
-    const client = await Client.findByPk(id);
+    await Receiver.destroy({ where: { clientId: id }, transaction });
+
+    const client = await Client.findByPk(id, { transaction });
     if (!client) return res.status(404).json({ message: "Client not found" });
 
-    await client.destroy();
-    res.json({ message: "Client deleted" });
+    await client.destroy({ transaction });
+
+    await transaction.commit();
+    res.json({ message: "Client and associated receivers deleted" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    await transaction.rollback();
+    console.error("Error deleting client:", error);
+    res.status(500).json({ message: "Error deleting client and receivers" });
   }
 };
 

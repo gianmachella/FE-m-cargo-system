@@ -49,13 +49,13 @@ const SideMenu = ({ collapsed }) => {
         <ul
           className={`submenu${activeMenu === "lot" ? " submenu-active" : ""}`}
         >
-          <Link className="text-item-menu" to="/admin/lot/create-lot">
+          <Link className="text-item-menu" to="/lotes/crear">
             <li className="item-menu-sidebar">
               <BsBoxes className="icon-menu" />
               {!collapsedMenu && key?.admin_sidemenu_item_create_lot}
             </li>
           </Link>
-          <Link className="text-item-menu" to="/admin/lot/update-lot">
+          <Link className="text-item-menu" to="/lotes">
             <li className="item-menu-sidebar">
               <BsBoxes className="icon-menu" />
               {!collapsedMenu && key?.admin_sidemenu_item_update_lot}

@@ -1,16 +1,43 @@
+const { Op } = require("sequelize");
 const Batch = require("../models/Batch");
 
-// Get all batches with pagination, search, and filtering
 const getBatches = async (req, res) => {
+  const { page = 1, limit = 10, search = "" } = req.query;
+
+  const offset = (page - 1) * limit;
+
   try {
-    const batches = await Batch.findAll();
-    res.json(batches);
+    // Condición para filtrar por número de lote, país de destino o tipo de envío
+    const whereCondition = search
+      ? {
+          [Op.or]: [
+            { batchNumber: { [Op.like]: `%${search}%` } },
+            { destinationCountry: { [Op.like]: `%${search}%` } },
+            { shipmentType: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const { rows, count } = await Batch.findAndCountAll({
+      where: whereCondition,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json({
+      data: rows,
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error al obtener los lotes:", error);
+    res.status(500).json({ message: "Error al obtener los lotes" });
   }
 };
 
-// Create a new batch
+// Crear un nuevo lote
 const createBatch = async (req, res) => {
   try {
     const newBatch = await Batch.create(req.body);
@@ -20,7 +47,23 @@ const createBatch = async (req, res) => {
   }
 };
 
-// Update a batch by ID
+// Obtener un lote por su ID
+const getBatchById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const batch = await Batch.findByPk(id);
+
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found" });
+    }
+
+    res.json(batch);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Actualizar un lote por su ID
 const updateBatch = async (req, res) => {
   try {
     const { id } = req.params;
@@ -37,7 +80,7 @@ const updateBatch = async (req, res) => {
   }
 };
 
-// Delete a batch by ID
+// Eliminar un lote por su ID
 const deleteBatch = async (req, res) => {
   try {
     const { id } = req.params;
@@ -54,22 +97,10 @@ const deleteBatch = async (req, res) => {
   }
 };
 
-// Get batches by shipment ID
-const getBatchByShipment = async (req, res) => {
-  try {
-    const { shipmentId } = req.params;
-    const batches = await Batch.findAll({ where: { shipmentId } });
-    res.json(batches);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Export all the functions to be used in the routes
 module.exports = {
   getBatches,
   createBatch,
+  getBatchById,
   updateBatch,
   deleteBatch,
-  getBatchByShipment,
 };

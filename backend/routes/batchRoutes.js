@@ -2,23 +2,19 @@ const express = require("express");
 const {
   getBatches,
   createBatch,
+  getBatchById,
   updateBatch,
   deleteBatch,
-  getBatchByShipment,
-} = require("../controllers/batchController"); // Verificar que estas funciones existan y se estén exportando correctamente
+} = require("../controllers/batchController");
 const { protect } = require("../middlewares/authMiddleware");
-const { validatePagination } = require("../middlewares/validatePagination");
+
 const router = express.Router();
 
+router.route("/").get(protect, getBatches).post(protect, createBatch);
 router
-  .route("/")
-  .get(protect, validatePagination, getBatches) // Verificar que getBatches no sea undefined
-  .post(protect, createBatch);
-
-router.route("/:id").put(protect, updateBatch).delete(protect, deleteBatch);
-
-router
-  .route("/shipment/:shipmentId")
-  .get(protect, validatePagination, getBatchByShipment);
+  .route("/:id")
+  .get(protect, getBatchById)
+  .put(protect, updateBatch)
+  .delete(protect, deleteBatch);
 
 module.exports = router;
