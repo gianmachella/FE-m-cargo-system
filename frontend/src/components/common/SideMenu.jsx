@@ -58,7 +58,7 @@ const SideMenu = ({ collapsed }) => {
           <Link className="text-item-menu" to="/lotes">
             <li className="item-menu-sidebar">
               <BsBoxes className="icon-menu" />
-              {!collapsedMenu && key?.admin_sidemenu_item_update_lot}
+              Ver Lotes
             </li>
           </Link>
         </ul>
@@ -80,10 +80,7 @@ const SideMenu = ({ collapsed }) => {
               {!collapsedMenu && key?.admin_sidemenu_item_create_shipment}
             </li>
           </Link>
-          <Link
-            className="text-item-menu"
-            to="/admin/shipment/consult-shipment"
-          >
+          <Link className="text-item-menu" to="/envios">
             <li className="item-menu-sidebar">
               <BsBox2 className="icon-menu" />
               {!collapsedMenu && key?.admin_sidemenu_item_consult_shipment}

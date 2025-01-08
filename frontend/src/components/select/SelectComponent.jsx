@@ -1,4 +1,4 @@
-import "./Select.css"; // Asegúrate de que este archivo esté presente y correctamente importado
+import "./Select.css";
 
 import PropTypes from "prop-types";
 import React from "react";
@@ -11,15 +11,12 @@ const Select = ({
   onChange = () => {},
   name = "",
   disabled = false,
+  width = "100%", // Nueva propiedad para personalizar el ancho
 }) => {
   return (
-    <div className="input-wrapper">
-      {" "}
-      {/* Usar la misma clase contenedora que `Input` */}
+    <div className="input-wrapper" style={{ width }}>
       {label && <label className="input-label">{label}</label>}
       <div className="input-container">
-        {" "}
-        {/* Usar el mismo contenedor que `Input` */}
         <select
           className="styled-input"
           value={value}
@@ -54,6 +51,7 @@ Select.propTypes = {
   onChange: PropTypes.func,
   name: PropTypes.string,
   disabled: PropTypes.bool,
+  width: PropTypes.string, // Validación del ancho personalizado
 };
 
 export default Select;

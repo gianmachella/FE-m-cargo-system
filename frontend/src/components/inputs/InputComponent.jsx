@@ -20,6 +20,7 @@ const Input = ({
   isValid = true,
   name = "",
   disabled = false,
+  width = "100%", // Nueva propiedad para personalizar el ancho
 }) => {
   const [inputValue, setInputValue] = useState(inputText);
   const [valid, setValid] = useState(isValid);
@@ -41,7 +42,7 @@ const Input = ({
   };
 
   return (
-    <div className="input-wrapper">
+    <div className="input-wrapper" style={{ width }}>
       {label && <label className="input-label">{label}</label>}
       <div
         className="input-container"
@@ -97,6 +98,8 @@ Input.propTypes = {
   onChange: PropTypes.func,
   isValid: PropTypes.bool,
   name: PropTypes.string,
+  disabled: PropTypes.bool,
+  width: PropTypes.string, // Validación del ancho personalizado
 };
 
 export default Input;

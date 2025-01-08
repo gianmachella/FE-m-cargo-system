@@ -31,37 +31,54 @@ const getShipments = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Create a new shipment
 const createShipment = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
   try {
     const {
       shipmentNumber,
+      clientId,
       batchId,
       boxes,
       totalWeight,
       totalVolume,
       totalBoxes,
-      status,
-      createdBy,
-      senderUserId,
+      status = "recibido en almacen",
       receiver,
     } = req.body;
-    const newShipment = await Shipment.create({
-      shipmentNumber,
-      batchId,
-      boxes,
-      totalWeight,
-      totalVolume,
-      totalBoxes,
-      status,
-      createdBy,
-      updatedBy: createdBy,
-      senderUserId,
-      receiver,
-    });
-    res.json(newShipment);
+
+    // Crear el envío
+    const newShipment = await Shipment.create(
+      {
+        shipmentNumber,
+        clientId,
+        totalWeight,
+        totalVolume,
+        totalBoxes,
+        status,
+        receiver,
+      },
+      { transaction }
+    );
+
+    // Actualizar cliente con el número de envío
+    const client = await Client.findByPk(clientId, { transaction });
+    const updatedShipments = client.shipments
+      ? [...client.shipments, shipmentNumber]
+      : [shipmentNumber];
+    await client.update({ shipments: updatedShipments }, { transaction });
+
+    // Actualizar lote con el número de envío
+    const batch = await Batch.findByPk(batchId, { transaction });
+    const updatedBatchShipments = batch.shipments
+      ? [...batch.shipments, shipmentNumber]
+      : [shipmentNumber];
+    await batch.update({ shipments: updatedBatchShipments }, { transaction });
+
+    await transaction.commit();
+    res.status(201).json(newShipment);
   } catch (error) {
+    await transaction.rollback();
     res.status(500).json({ message: error.message });
   }
 };
