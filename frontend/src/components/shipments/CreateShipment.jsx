@@ -3,6 +3,7 @@ import "./ShippingWizard.css";
 import { BsBox2, BsBoxes } from "react-icons/bs";
 import { FaPen, FaTrashCan } from "react-icons/fa6";
 import { FormContainer, FormSection } from "../form/Form";
+import { Navigate, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 
 import Button from "../button/Button";
@@ -78,6 +79,8 @@ const ShippingWizard = () => {
   const [totalVolume, setTotalVolume] = useState(0);
   const [totalBoxes, setTotalBoxes] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  const navigate = useNavigate();
 
   // Cargar lotes al inicio
   useEffect(() => {
@@ -187,20 +190,30 @@ const ShippingWizard = () => {
 
   const handleSaveShipment = async () => {
     try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
       const shipmentData = {
+        batchId: selectedBatch.id,
         shipmentNumber,
         clientId: selectedClient.id,
         totalWeight,
         totalVolume,
         totalBoxes: boxes.length,
         status: "recibido en almacen",
-        receiver: selectedReceiver,
+        receiverId: selectedReceiver.id,
+        createdBy: 1,
+        updatedBy: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        boxes: JSON.stringify(boxes),
       };
 
       const response = await fetch("http://localhost:5000/api/shipments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(shipmentData),
       });
@@ -209,6 +222,7 @@ const ShippingWizard = () => {
 
       Swal.fire("¡Éxito!", "El envío ha sido registrado.", "success");
       setShowConfirmationModal(false);
+      navigate("/envios");
     } catch (error) {
       Swal.fire("Error", error.message, "error");
     }

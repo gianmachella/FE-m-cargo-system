@@ -42,7 +42,7 @@ const CreateBatch = () => {
       if (!response.ok) throw new Error("Error al crear lote.");
 
       Swal.fire("Éxito", "Lote creado con éxito", "success").then(() => {
-        navigate("/batches"); // Redirige a la lista de lotes
+        navigate("/lotes"); // Redirige a la lista de lotes
       });
     } catch (error) {
       Swal.fire("Error", error.message || "No se pudo crear el lote", "error");

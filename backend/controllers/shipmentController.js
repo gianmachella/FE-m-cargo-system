@@ -1,4 +1,8 @@
+const Client = require("../models/Client");
 const Shipment = require("../models/Shipment");
+const Batch = require("../models/Batch");
+const { sequelize } = require("../config/db");
+const { Op } = require("sequelize");
 
 // Get all shipments with pagination, search and filtering
 const getShipments = async (req, res) => {
@@ -17,6 +21,13 @@ const getShipments = async (req, res) => {
 
     const shipments = await Shipment.findAndCountAll({
       where: whereCondition,
+      include: [
+        {
+          model: Client, // Relación con el modelo Client
+          as: "client", // Alias definido en la asociación
+          attributes: ["id", "firstName", "lastName", "phone", "email"], // Campos específicos del cliente
+        },
+      ],
       limit: parseInt(limit),
       offset: parseInt(offset),
     });
@@ -31,38 +42,53 @@ const getShipments = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 const createShipment = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
+    console.log(req.body);
+
     const {
       shipmentNumber,
-      clientId,
       batchId,
+      clientId,
+      receiverId,
       boxes,
       totalWeight,
       totalVolume,
       totalBoxes,
-      status = "recibido en almacen",
-      receiver,
+      status,
+      createdBy,
+      updatedBy,
+      createdAt,
+      updatedAt,
     } = req.body;
 
     // Crear el envío
     const newShipment = await Shipment.create(
       {
         shipmentNumber,
+        batchId,
         clientId,
+        receiverId,
+        boxes,
         totalWeight,
         totalVolume,
         totalBoxes,
         status,
-        receiver,
+        createdBy,
+        updatedBy,
+        createdAt,
+        updatedAt,
       },
       { transaction }
     );
 
-    // Actualizar cliente con el número de envío
-    const client = await Client.findByPk(clientId, { transaction });
+    const client = await Client.findByPk(clientId, {
+      include: [{ model: Shipment, as: "shipments" }],
+    });
+
     const updatedShipments = client.shipments
       ? [...client.shipments, shipmentNumber]
       : [shipmentNumber];

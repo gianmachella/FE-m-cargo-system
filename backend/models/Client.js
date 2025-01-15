@@ -7,7 +7,6 @@ const Client = sequelize.define("Client", {
   lastName: { type: DataTypes.STRING, allowNull: false },
   phone: { type: DataTypes.STRING, allowNull: false },
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
-  shipments: { type: DataTypes.JSON, allowNull: true }, // Números de envío
 });
 
 module.exports = Client;

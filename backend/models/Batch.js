@@ -8,8 +8,8 @@ const Batch = sequelize.define("Batch", {
   status: { type: DataTypes.STRING, allowNull: false },
   shipmentType: { type: DataTypes.STRING, allowNull: false },
   shipments: { type: DataTypes.JSON, allowNull: true }, // Envíos asociados
-  createdBy: { type: DataTypes.INTEGER, allowNull: false },
-  updatedBy: { type: DataTypes.INTEGER, allowNull: false },
+  createdBy: { type: DataTypes.INTEGER, allowNull: true },
+  updatedBy: { type: DataTypes.INTEGER, allowNull: true },
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 });
