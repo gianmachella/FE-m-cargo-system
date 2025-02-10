@@ -43,14 +43,14 @@ const createClient = async (req, res) => {
   const transaction = await Client.sequelize.transaction();
 
   try {
-    console.log("Datos recibidos:", req.body);
-
-    // Crear cliente
     const newClient = await Client.create(
       { firstName, lastName, phone, email },
       { transaction }
     );
-    console.log("Cliente creado:", newClient);
+
+    if (!newClient) {
+      throw new Error("El cliente no se creó correctamente.");
+    }
 
     // Crear receptores asociados
     if (receivers && receivers.length > 0) {
@@ -58,10 +58,12 @@ const createClient = async (req, res) => {
         ...receiver,
         clientId: newClient.id,
       }));
-      console.log("Datos de receptores:", receiversData);
+
+      if (receiversData.some((r) => !r.firstName || !r.lastName || !r.phone)) {
+        throw new Error("Uno o más receptores tienen datos inválidos.");
+      }
 
       await Receiver.bulkCreate(receiversData, { transaction });
-      console.log("Receptores creados con éxito.");
     }
 
     await transaction.commit();
@@ -69,6 +71,7 @@ const createClient = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error("Error al crear cliente:", error);
+
     res.status(500).json({
       message: "Error al crear el cliente.",
       error: error.message,

@@ -71,7 +71,9 @@ const Nav = (props) => {
       <div className="nav-container-right">
         {/* Logo y Menú Colapsable */}
         <div className="left-side-nav">
-          <img src={logo} width="150" className="m-1" alt="Logo" />
+          <a href="/">
+            <img src={logo} width="150" className="m-1" alt="Logo" />
+          </a>
           <div onClick={collapse}>
             <BiMenu className="icon-menu-collapse" />
           </div>

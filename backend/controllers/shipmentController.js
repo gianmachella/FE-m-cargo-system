@@ -4,7 +4,6 @@ const Batch = require("../models/Batch");
 const { sequelize } = require("../config/db");
 const { Op } = require("sequelize");
 
-// Get all shipments with pagination, search and filtering
 const getShipments = async (req, res) => {
   try {
     const { page = 1, limit = 10, search } = req.query;
@@ -23,9 +22,9 @@ const getShipments = async (req, res) => {
       where: whereCondition,
       include: [
         {
-          model: Client, // Relación con el modelo Client
-          as: "client", // Alias definido en la asociación
-          attributes: ["id", "firstName", "lastName", "phone", "email"], // Campos específicos del cliente
+          model: Client,
+          as: "client",
+          attributes: ["id", "firstName", "lastName", "phone", "email"],
         },
       ],
       limit: parseInt(limit),
@@ -63,9 +62,12 @@ const createShipment = async (req, res) => {
       updatedBy,
       createdAt,
       updatedAt,
+      insurance,
+      paymentMethod,
+      declaredValue,
+      valuePaid,
     } = req.body;
 
-    // Crear el envío
     const newShipment = await Shipment.create(
       {
         shipmentNumber,
@@ -81,6 +83,10 @@ const createShipment = async (req, res) => {
         updatedBy,
         createdAt,
         updatedAt,
+        insurance,
+        paymentMethod,
+        declaredValue,
+        valuePaid,
       },
       { transaction }
     );
@@ -94,7 +100,6 @@ const createShipment = async (req, res) => {
       : [shipmentNumber];
     await client.update({ shipments: updatedShipments }, { transaction });
 
-    // Actualizar lote con el número de envío
     const batch = await Batch.findByPk(batchId, { transaction });
     const updatedBatchShipments = batch.shipments
       ? [...batch.shipments, shipmentNumber]
@@ -109,7 +114,6 @@ const createShipment = async (req, res) => {
   }
 };
 
-// Update shipment by ID
 const updateShipment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -144,7 +148,6 @@ const updateShipment = async (req, res) => {
   }
 };
 
-// Delete shipment by ID
 const deleteShipment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -161,7 +164,7 @@ const deleteShipment = async (req, res) => {
 
 const getShipmentsByBatch = async (req, res) => {
   try {
-    const { batchId } = req.params; // ID del lote
+    const { batchId } = req.params;
     const batch = await Batch.findByPk(batchId, {
       include: {
         model: Shipment,

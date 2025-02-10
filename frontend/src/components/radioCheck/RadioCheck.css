@@ -1,0 +1,28 @@
+.radio-check-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-check-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.radio-check-options {
+  display: flex;
+  gap: 10px;
+}
+
+.radio-check-option {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #555;
+}
+
+.radio-check-option input {
+  cursor: pointer;
+}

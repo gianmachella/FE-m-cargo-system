@@ -2,12 +2,14 @@ import "./CreateClient.css";
 
 import { BsFillPencilFill, BsX } from "react-icons/bs";
 import { FormContainer, FormSection } from "../form/Form";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { countryOptions, shipmentTypeOptions } from "../../utilities/options";
 
 import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
+import { use } from "react";
 
 const CreateClient = (props) => {
   const { clientData } = props;
@@ -22,22 +24,20 @@ const CreateClient = (props) => {
   const [receptorTelefono, setReceptorTelefono] = useState("");
   const [receptorDireccion, setReceptorDireccion] = useState("");
   const [receptorPais, setReceptorPais] = useState("");
+  const [receptorState, setReceptorState] = useState("");
+  const [receptorCity, setReceptorCity] = useState("");
 
   const [receptores, setReceptores] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
 
   const [clientErrors, setClientErrors] = useState({});
   const [receptorErrors, setReceptorErrors] = useState({});
-  const [loading, setLoading] = useState(false); // Para manejar el estado de carga
-  const [successMessage, setSuccessMessage] = useState(""); // Para manejar mensajes de éxito
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  console.log("Data", clientData);
-
-  const countryOptions = [
-    { label: "Venezuela", value: "ven" },
-    { label: "Colombia", value: "col" },
-    { label: "Ecuador", value: "ecu" },
-  ];
+  const [receptorDataValid, setReceptorDataValid] = useState(false);
+  const [clientDataValid, setClientDataValid] = useState(false);
+  const [disableSaveClient, setDisableSaveClient] = useState(true);
 
   const validateClient = () => {
     const errors = {};
@@ -58,10 +58,33 @@ const CreateClient = (props) => {
     if (!receptorTelefono || !/^\d{10}$/.test(receptorTelefono))
       errors.receptorTelefono = "Teléfono inválido (10 dígitos)";
     if (!receptorDireccion) errors.receptorDireccion = "Dirección requerida";
+    if (!receptorState) errors.receptorState = "Estado es requerido";
+    if (!receptorCity) errors.receptorCity = "Ciudad requerida";
     if (!receptorPais || receptorPais === "")
       errors.receptorPais = "País requerido";
     setReceptorErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const validateForm = () => {
+    const isReceptorValid = receptores.length > 0;
+
+    const isClientValid =
+      Boolean(nombre?.trim()) &&
+      Boolean(apellido?.trim()) &&
+      Boolean(telefono?.trim()) &&
+      Boolean(email?.trim());
+
+    setReceptorDataValid(isReceptorValid);
+    setClientDataValid(isClientValid);
+
+    console.log(isClientValid, isReceptorValid);
+
+    if (isClientValid && isReceptorValid) {
+      setDisableSaveClient(false);
+    } else {
+      setDisableSaveClient(true);
+    }
   };
 
   const addReceptor = () => {
@@ -131,22 +154,50 @@ const CreateClient = (props) => {
     resetReceptorForm();
   };
 
+  const handleSendEmail = async (clientData) => {
+    const response = await fetch("http://localhost:5000/api/send-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to: clientData.email,
+        data: clientData,
+        subject: `Bienvenido ${clientData.firstName} ${clientData.lastName}}`,
+        type: "newClient",
+      }),
+    });
+
+    const data = await response.json();
+    console.log(data);
+  };
+
   const handleSubmit = async () => {
     if (!validateClient()) return;
 
     setLoading(true);
     setSuccessMessage("");
 
-    // Obtener el token del localStorage o sessionStorage
+    // Obtener el token
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    if (!token) {
+      Swal.fire({
+        title: "Error",
+        text: "No se encontró un token de autenticación.",
+        icon: "error",
+      });
+      setLoading(false);
+      return;
+    }
 
     const clientData = {
       firstName: nombre,
       lastName: apellido,
       phone: telefono,
       email,
-      createdBy: 1, // Este valor debería venir del usuario autenticado
+      createdBy: 1, // Asegúrate de que este ID sea dinámico
       receivers: receptores.map((receptor) => ({
         firstName: receptor.nombre,
         lastName: receptor.apellido,
@@ -161,7 +212,7 @@ const CreateClient = (props) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Incluye el token en el encabezado
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(clientData),
       });
@@ -170,20 +221,36 @@ const CreateClient = (props) => {
         const data = await response.json();
         Swal.fire({
           title: "Guardado",
-          text: "Cliente guardado con exito",
+          text: "Cliente guardado con éxito",
           icon: "success",
         });
-        resetForm(); // Reinicia el formulario tras el éxito
+
+        handleSendEmail(clientData);
+        resetForm(); // Limpia el formulario
       } else {
         const errorData = await response.json();
-        console.error("Error al guardar cliente", errorData);
+        Swal.fire({
+          title: "Error",
+          text: errorData.message || "No se pudo registrar el cliente",
+          icon: "error",
+        });
+        console.error("Error al guardar cliente:", errorData);
       }
     } catch (error) {
       console.error("Error en la solicitud:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Hubo un problema de conexión con el servidor.",
+        icon: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    validateForm();
+  }, [receptores, nombre, apellido, telefono, email, disableSaveClient]);
 
   return (
     <FormContainer>
@@ -281,6 +348,28 @@ const CreateClient = (props) => {
             {receptorErrors.receptorDireccion && (
               <p className="error">{receptorErrors.receptorDireccion}</p>
             )}
+            <div className="form-par">
+              <Input
+                label="Ciudad"
+                placeholder="Ciudad"
+                value={receptorCity}
+                inputText={receptorCity}
+                onChange={(e) => setReceptorCity(e.target.value)}
+              />
+              {receptorErrors.receptorCity && (
+                <p className="error">{receptorErrors.receptorCity}</p>
+              )}
+              <Input
+                label="Estatado/Provincia"
+                placeholder="Estatado/Provincia"
+                value={receptorState}
+                inputText={receptorState}
+                onChange={(e) => setReceptorState(e.target.value)}
+              />
+              {receptorErrors.receptorState && (
+                <p className="error">{receptorErrors.receptorState}</p>
+              )}
+            </div>
             <Select
               label="País"
               placeholder="Selecciona un país"
@@ -338,7 +427,7 @@ const CreateClient = (props) => {
           onClick={handleSubmit}
           size="medium"
           color="#57cc99"
-          disabled={loading}
+          disabled={disableSaveClient}
         />
       </div>
     </FormContainer>

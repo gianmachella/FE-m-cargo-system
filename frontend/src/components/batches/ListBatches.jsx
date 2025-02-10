@@ -3,6 +3,11 @@ import "./ListBatches.css";
 import { FaPen, FaTrashCan } from "react-icons/fa6";
 import { FormContainer, FormSection } from "../form/Form";
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  countryOptions,
+  shipmentTypeOptions,
+  statusOptions,
+} from "../../utilities/options";
 import { useGlobalFilter, usePagination, useTable } from "react-table";
 
 import Button from "../button/Button";
@@ -32,9 +37,9 @@ const fetchBatches = async (page, search) => {
   if (!response.ok) throw new Error("Failed to fetch batches.");
 
   const result = await response.json();
-  console.log("Fetched batches:", result); // Verificar datos
+  console.log("Fetched batches:", result);
 
-  return result; // Retorna el objeto completo para usar `data` en `loadBatches`
+  return result;
 };
 
 const ListBatches = () => {
@@ -51,12 +56,12 @@ const ListBatches = () => {
     setLoading(true);
     try {
       const response = await fetchBatches(page + 1, search);
-      console.log("API Response:", response); // Verificar la estructura
+      console.log("API Response:", response);
 
-      const { data, totalPages } = response; // Asegúrate de extraer `data`
+      const { data, totalPages } = response;
 
-      setBatches(data || []); // Guarda solo el array de lotes
-      setTotalPages(totalPages || 1); // Configura el total de páginas
+      setBatches(data || []);
+      setTotalPages(totalPages || 1);
     } catch (err) {
       console.error("Error loading batches:", err);
       setError("Error al cargar los lotes.");
@@ -66,7 +71,7 @@ const ListBatches = () => {
   };
 
   useEffect(() => {
-    loadBatches(); // Carga los lotes cada vez que cambia el término de búsqueda
+    loadBatches();
   }, [page, search]);
 
   const columns = useMemo(
@@ -301,11 +306,7 @@ const ListBatches = () => {
                   destinationCountry: e.target.value,
                 })
               }
-              options={[
-                { label: "Venezuela", value: "Venezuela" },
-                { label: "Colombia", value: "Colombia" },
-                { label: "Ecuador", value: "Ecuador" },
-              ]}
+              options={countryOptions}
             />
 
             <Select
@@ -314,11 +315,7 @@ const ListBatches = () => {
               onChange={(e) =>
                 setSelectedBatch({ ...selectedBatch, status: e.target.value })
               }
-              options={[
-                { label: "En Proceso", value: "En Proceso" },
-                { label: "Completado", value: "Completado" },
-                { label: "Cancelado", value: "Cancelado" },
-              ]}
+              options={statusOptions}
             />
 
             {/* Select para el tipo de envío */}
@@ -331,11 +328,7 @@ const ListBatches = () => {
                   shipmentType: e.target.value,
                 })
               }
-              options={[
-                { label: "Marítimo", value: "Marítimo" },
-                { label: "Aéreo", value: "Aéreo" },
-                { label: "Terrestre", value: "Terrestre" },
-              ]}
+              options={shipmentTypeOptions}
             />
 
             <div className="button-save">
