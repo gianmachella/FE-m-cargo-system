@@ -132,7 +132,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  overflow-y: auto; /* Permite el scroll vertical */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* --- CONTENIDO DE LA MODAL --- */
@@ -184,9 +185,17 @@
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  width: 100%;
 }
 
 .modal-actions button {
   width: 20%;
   margin: 20px;
+}
+
+#pdf-content {
+  width: 800px; /* Ajusta el ancho */
+  min-height: 1200px; /* Asegura que tenga altura suficiente */
+  background: white;
+  overflow: visible !important; /* Evita cortes */
 }

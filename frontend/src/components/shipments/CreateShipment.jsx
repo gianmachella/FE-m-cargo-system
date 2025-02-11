@@ -1,15 +1,12 @@
 import "./ShippingWizard.css";
 
 import { BsBox2, BsBoxes } from "react-icons/bs";
-import { Navigate, useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-import Button from "../button/Button";
-import ButtonComponent from "../button/Button";
-import { FaTrashCan } from "react-icons/fa6";
 import { FaUser } from "react-icons/fa";
 import Modal from "react-modal";
-import Select from "../select/SelectComponent";
+import ModalComfirmation from "./ModalComfirmation";
+import PDFFormat from "./PDFFormat";
 import { Steep1 } from "./steeps/Steep1";
 import Steep2 from "./steeps/Steep2";
 import Steep3 from "./steeps/Steep3";
@@ -25,6 +22,7 @@ const ShippingWizard = () => {
   const [dataSteepOne, setDataSteepOne] = useState([]);
   const [dataSteepTwo, setDataSteepTwo] = useState([]);
   const [dataSteepThree, setDataSteepThree] = useState([]);
+  const [showPDFContent, setShowPDFContent] = useState(false);
 
   const handleNextStep = () => {
     setCurrentStep((prev) => Math.min(prev + 1, 3));
@@ -34,33 +32,39 @@ const ShippingWizard = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleDownloadPDF = () => {
-    const modalContent = document.getElementById("modal-content-pdf");
+  const handleDownloadPDF = async () => {
+    setShowPDFContent(true); // Mostrar temporalmente
 
-    if (!modalContent) {
-      console.error("Error: No se encontró el elemento modal-content-pdf");
-      Swal.fire(
-        "Error",
-        "No se pudo generar el PDF. Intenta nuevamente.",
-        "error"
-      );
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Dar tiempo a renderizar
+
+    const pdfContent = document.getElementById("pdf-content");
+
+    if (!pdfContent) {
+      console.error("No se encontró el elemento pdf-content");
+      Swal.fire("Error", "No se pudo generar el PDF.", "error");
+      setShowPDFContent(false);
       return;
     }
 
-    html2canvas(modalContent, { scale: 2 })
+    html2canvas(pdfContent, {
+      scale: 2,
+      useCORS: true,
+    })
       .then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
         const pdf = new jsPDF("p", "mm", "a4");
         const imgWidth = 190;
         let imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let position = 10;
 
-        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-        pdf.save("confirmacion_envio.pdf");
+        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+        pdf.save(`confirmacion_envio-${dataSteepThree.shipmentNumber}.pdf`);
+
+        setShowPDFContent(false); // Ocultar después de capturar
       })
       .catch((error) => {
         console.error("Error al generar el PDF:", error);
         Swal.fire("Error", "Hubo un problema al generar el PDF.", "error");
+        setShowPDFContent(false);
       });
   };
 
@@ -207,220 +211,23 @@ const ShippingWizard = () => {
           setShowConfirmationModal={setShowConfirmationModal}
         />
       )}
-      <Modal
-        isOpen={showConfirmationModal}
-        onRequestClose={() => setShowConfirmationModal(false)}
-        className="custom-modal"
-        overlayClassName="custom-modal-overlay"
-      >
-        <div id="modal-content-pdf">
-          <div className="row">
-            <h2 className="col-md-6 modal-title ">Confirmar Envío</h2>
-            <img
-              className="col-md-6"
-              src="https://globalcargous.com/images/1.png"
-              alt=""
-            />
-          </div>
-          <div className="modal-content">
-            <div className="container">
-              <h5 className="mt-3">Datos Cliente:</h5>
-              <div className="row">
-                <div className="col-md-3">
-                  <label>Nombre Remitente:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={`${dataSteepOne.clientData?.firstName || ""} ${
-                      dataSteepOne.clientData?.lastName || ""
-                    }`}
-                    readOnly
-                  />
-                </div>
-
-                <div className="col-md-3">
-                  <label>Nombre Receptor:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={`${dataSteepOne.receiverData?.firstName || ""} ${
-                      dataSteepOne.receiverData?.lastName || ""
-                    }`}
-                    readOnly
-                  />
-                </div>
-
-                <div className="col-md-6">
-                  <label>Dirección:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={dataSteepOne.receiverData?.address || ""}
-                    readOnly
-                  />
-                </div>
-                <h5 className="mt-3">Datos de Envio:</h5>
-                <div className="col-md-3">
-                  <label>Lote:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={dataSteepTwo?.batchNumber || ""}
-                    readOnly
-                  />
-                </div>
-
-                <div className="col-md-3">
-                  <label>Número de Envío:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={dataSteepThree?.shipmentNumber || ""}
-                    readOnly
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label>Tipo de Envío:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={dataSteepThree?.shipmentType || ""}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              <div className="row mt-2">
-                <div className="col-md-2">
-                  <label>Total Cajas:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={dataSteepThree?.totalBoxes || ""}
-                    readOnly
-                  />
-                </div>
-
-                <div className="col-md-2">
-                  <label>Peso Total (lbs):</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={`${dataSteepThree?.totalWeight || ""} lbs`}
-                    readOnly
-                  />
-                </div>
-
-                <div className="col-md-2">
-                  <label>Volumen Total:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={`${dataSteepThree?.totalVolume || ""} ${
-                      dataSteepThree?.shipmentType === "Marítimo"
-                        ? "ft³"
-                        : "ft²"
-                    }`}
-                    readOnly
-                  />
-                </div>
-
-                <div className="col-md-3">
-                  <label>Método de Pago:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={dataSteepThree?.paymentMethod || ""}
-                    readOnly
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label>Seguro:</label>
-                  <div className="d-flex align-items-center">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(
-                        dataSteepThree?.isWithEnsurance === "si"
-                      )}
-                      disabled
-                    />
-                    {dataSteepThree?.insurance && (
-                      <input
-                        type="text"
-                        className="form-control ms-2"
-                        value={
-                          dataSteepThree?.insuranceAmount === "si"
-                            ? `$${dataSteepThree.amount || 0}`
-                            : "$0.00"
-                        }
-                        readOnly
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="row mt-5"></div>
-              <div className="row">
-                <div className="col-md-8">
-                  <h3>Lista de Cajas:</h3>
-                  <ul className="boxes-list">
-                    {Array.isArray(dataSteepThree?.boxes) &&
-                    dataSteepThree.boxes.length > 0 ? (
-                      dataSteepThree.boxes.map((box, index) => (
-                        <li key={index}>
-                          <div className="box-item">
-                            {box.size} - {box?.weight} lbs
-                          </div>
-                        </li>
-                      ))
-                    ) : (
-                      <li>No hay cajas registradas</li>
-                    )}
-                  </ul>
-                </div>
-
-                <div className="col-md-4">
-                  <div className="row mt-2">
-                    <div className="col-md-6 offset-md-5">
-                      <label>Valor Declarado:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={`$${dataSteepThree?.declaredValue || ""}`}
-                        readOnly
-                      />
-                    </div>
-
-                    <div className="col-md-6 offset-md-5">
-                      <label>Valor Pagado:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={`$${dataSteepThree?.valuePaid || ""}`}
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className=" modal-actions">
-            <Button
-              className=""
-              text="Cancelar"
-              color="#e63946"
-              onClick={() => setShowConfirmationModal(false)}
-            />
-            <Button
-              className="text-center"
-              text="Guardar"
-              color="#38b000"
-              onClick={handleSaveShipment}
-            />
-          </div>
-        </div>
-      </Modal>
+      <ModalComfirmation
+        showConfirmationModal={showConfirmationModal}
+        setShowConfirmationModal={setShowConfirmationModal}
+        dataSteepOne={dataSteepOne}
+        dataSteepTwo={dataSteepTwo}
+        dataSteepThree={dataSteepThree}
+        handleSaveShipment={handleSaveShipment}
+      />
+      {showPDFContent && (
+        <header id="pdf-content">
+          <PDFFormat
+            dataSteepOne={dataSteepOne}
+            dataSteepTwo={dataSteepTwo}
+            dataSteepThree={dataSteepThree}
+          />
+        </header>
+      )}
     </div>
   );
 };
