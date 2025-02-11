@@ -67,7 +67,7 @@ const Nav = (props) => {
   };
 
   return (
-    <nav className="row nav-container navbar navbar-light bg-light shadow p-3 mb-5 bg-white rounded">
+    <nav className=" nav-container">
       <div className="nav-container-right">
         {/* Logo y Menú Colapsable */}
         <div className="left-side-nav">

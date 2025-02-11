@@ -67,7 +67,7 @@ export const Steep1 = (props) => {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <div className="clients-list">
+      <div className="clients-list mb-3">
         {clients && clients.length > 0 ? (
           clients.map((client) => (
             <div

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   paymentMethods,
   shipmentTypeOptions,
@@ -46,9 +46,21 @@ const Steep3 = (props) => {
       return;
     }
 
+    const volumeKey =
+      shipmentType === "Marítimo"
+        ? "volumeM"
+        : shipmentType === "Aéreo"
+        ? "volumeA"
+        : null;
+
+    if (!volumeKey) {
+      Swal.fire("Error", "El tipo de envío no es válido.", "error");
+      return;
+    }
+
     setBoxes((prevBoxes) => [
       ...prevBoxes,
-      { ...newBox, volume: selectedSizeOption.volume },
+      { ...newBox, volume: selectedSizeOption[volumeKey] || 0 },
     ]);
 
     setNewBox({ weight: "", size: "" });
@@ -70,7 +82,22 @@ const Steep3 = (props) => {
   };
 
   const calculateTotalVolume = () => {
-    return boxes.reduce((acc, box) => acc + box.volume, 0).toFixed(2);
+    if (!Array.isArray(boxes) || boxes.length === 0) {
+      return "0.00"; // Si no hay cajas, devuelve 0
+    }
+
+    const totalVolume = boxes.reduce((acc, box) => {
+      const volume = parseFloat(box.volume); // Usa directamente el volumen ya asignado
+
+      if (isNaN(volume)) {
+        console.warn("Error: Volumen inválido en la caja:", box);
+        return acc; // Ignorar valores inválidos
+      }
+
+      return acc + volume;
+    }, 0);
+
+    return totalVolume.toFixed(2);
   };
 
   const handleFinalize = () => {
@@ -78,7 +105,7 @@ const Steep3 = (props) => {
     setDataSteepThree({
       shipmentNumber,
       totalWeight,
-      totalVolume,
+      totalVolume: calculateTotalVolume(),
       totalBoxes,
       boxes,
       isWithEnsurance,
@@ -86,8 +113,11 @@ const Steep3 = (props) => {
       declaredValue,
       valuePaid,
       customSize,
+      shipmentType: shipmentType,
     });
   };
+
+  useEffect(() => {}, [shipmentType]);
 
   return (
     <FormContainer>
@@ -163,7 +193,9 @@ const Steep3 = (props) => {
         text="Agregar Caja"
         color="#0a91af"
         onClick={handleBoxAdd}
-        disabled={newBox?.weight === "" || newBox?.size === ""}
+        disabled={
+          newBox?.weight === "" || newBox?.size === "" || shipmentType === ""
+        }
       />
       <ul className="boxes-list">
         {boxes.map((box, index) => (
@@ -185,7 +217,10 @@ const Steep3 = (props) => {
 
       <p>Total Cajas: {totalBoxes}</p>
       <p>Peso Total: {totalWeight.toFixed(2)} lbs</p>
-      <p>Volumen Total: {calculateTotalVolume()} ft³</p>
+      <p>
+        Volumen Total: {calculateTotalVolume()}{" "}
+        {shipmentType === "Marítimo" ? "ft³" : "ft²"}
+      </p>
 
       <div className="buttons-wizard">
         <ButtonComponent

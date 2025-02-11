@@ -5,12 +5,17 @@ import { Navigate, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 
 import Button from "../button/Button";
+import ButtonComponent from "../button/Button";
+import { FaTrashCan } from "react-icons/fa6";
 import { FaUser } from "react-icons/fa";
 import Modal from "react-modal";
+import Select from "../select/SelectComponent";
 import { Steep1 } from "./steeps/Steep1";
 import Steep2 from "./steeps/Steep2";
 import Steep3 from "./steeps/Steep3";
 import Swal from "sweetalert2";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 Modal.setAppElement("#root");
 
@@ -27,6 +32,36 @@ const ShippingWizard = () => {
 
   const handlePreviousStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleDownloadPDF = () => {
+    const modalContent = document.getElementById("modal-content-pdf");
+
+    if (!modalContent) {
+      console.error("Error: No se encontró el elemento modal-content-pdf");
+      Swal.fire(
+        "Error",
+        "No se pudo generar el PDF. Intenta nuevamente.",
+        "error"
+      );
+      return;
+    }
+
+    html2canvas(modalContent, { scale: 2 })
+      .then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgWidth = 190;
+        let imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let position = 10;
+
+        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+        pdf.save("confirmacion_envio.pdf");
+      })
+      .catch((error) => {
+        console.error("Error al generar el PDF:", error);
+        Swal.fire("Error", "Hubo un problema al generar el PDF.", "error");
+      });
   };
 
   const handleSendEmail = async (shipmentData, clientData, receiverData) => {
@@ -58,48 +93,50 @@ const ShippingWizard = () => {
       console.log(dataSteepTwo);
       console.log(dataSteepThree);
 
-      const shipmentData = {
-        batchId: dataSteepTwo.id,
-        shipmentNumber: dataSteepThree.shipmentNumber,
-        clientId: dataSteepOne.clientData.id,
-        totalWeight: dataSteepThree.totalWeight,
-        totalVolume: dataSteepThree.totalVolume,
-        totalBoxes: dataSteepThree.totalBoxes,
-        status: "recibido en almacen",
-        receiverId: dataSteepOne.receiverData.id,
-        createdBy: 1,
-        updatedBy: 1,
-        insurance: dataSteepThree.isWithEnsurance,
-        paymentMethod: dataSteepThree.paymentMethod,
-        declaredValue: dataSteepThree.declaredValue,
-        valuePaid: dataSteepThree.valuePaid,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        boxes: JSON.stringify(dataSteepThree.boxes),
-      };
+      handleDownloadPDF();
 
-      const response = await fetch("http://localhost:5000/api/shipments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(shipmentData),
-      });
+      // const shipmentData = {
+      //   batchId: dataSteepTwo.id,
+      //   shipmentNumber: dataSteepThree.shipmentNumber,
+      //   clientId: dataSteepOne.clientData.id,
+      //   totalWeight: dataSteepThree.totalWeight,
+      //   totalVolume: dataSteepThree.totalVolume,
+      //   totalBoxes: dataSteepThree.totalBoxes,
+      //   status: "recibido en almacen",
+      //   receiverId: dataSteepOne.receiverData.id,
+      //   createdBy: 1,
+      //   updatedBy: 1,
+      //   insurance: dataSteepThree.isWithEnsurance,
+      //   paymentMethod: dataSteepThree.paymentMethod,
+      //   declaredValue: dataSteepThree.declaredValue,
+      //   valuePaid: dataSteepThree.valuePaid,
+      //   createdAt: new Date(),
+      //   updatedAt: new Date(),
+      //   boxes: JSON.stringify(dataSteepThree.boxes),
+      // };
 
-      if (response.ok) {
-        handleSendEmail(
-          shipmentData,
-          dataSteepOne.clientData,
-          dataSteepOne.receiverData
-        );
-      }
+      // const response = await fetch("http://localhost:5000/api/shipments", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify(shipmentData),
+      // });
 
-      if (!response.ok) throw new Error("Error al guardar el envío.");
+      // if (response.ok) {
+      //   handleSendEmail(
+      //     shipmentData,
+      //     dataSteepOne.clientData,
+      //     dataSteepOne.receiverData
+      //   );
+      //}
 
-      Swal.fire("¡Éxito!", "El envío ha sido registrado.", "success");
-      setShowConfirmationModal(false);
-      Navigate("/envios");
+      // if (!response.ok) throw new Error("Error al guardar el envío.");
+
+      // Swal.fire("¡Éxito!", "El envío ha sido registrado.", "success");
+      // setShowConfirmationModal(false);
+      // Navigate("/envios");
     } catch (error) {
       Swal.fire("Error", error.message, "error");
     }
@@ -176,140 +213,212 @@ const ShippingWizard = () => {
         className="custom-modal"
         overlayClassName="custom-modal-overlay"
       >
-        <h2 className="modal-title">Confirmar Envío</h2>
+        <div id="modal-content-pdf">
+          <div className="row">
+            <h2 className="col-md-6 modal-title ">Confirmar Envío</h2>
+            <img
+              className="col-md-6"
+              src="https://globalcargous.com/images/1.png"
+              alt=""
+            />
+          </div>
+          <div className="modal-content">
+            <div className="container">
+              <h5 className="mt-3">Datos Cliente:</h5>
+              <div className="row">
+                <div className="col-md-3">
+                  <label>Nombre Remitente:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={`${dataSteepOne.clientData?.firstName || ""} ${
+                      dataSteepOne.clientData?.lastName || ""
+                    }`}
+                    readOnly
+                  />
+                </div>
 
-        <div className="modal-content">
-          <div className="modal-form-container">
-            {/* Datos del Remitente */}
-            <div className="form-group">
-              <label>Nombre Remitente:</label>
-              <input
-                type="text"
-                value={`${dataSteepOne.clientData?.firstName || ""} ${
-                  dataSteepOne.clientData?.lastName || ""
-                }`}
-                readOnly
-              />
-            </div>
+                <div className="col-md-3">
+                  <label>Nombre Receptor:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={`${dataSteepOne.receiverData?.firstName || ""} ${
+                      dataSteepOne.receiverData?.lastName || ""
+                    }`}
+                    readOnly
+                  />
+                </div>
 
-            {/* Datos del Receptor */}
-            <div className="form-group">
-              <label>Nombre Receptor:</label>
-              <input
-                type="text"
-                value={`${dataSteepOne.receiverData?.firstName || ""} ${
-                  dataSteepOne.receiverData?.lastName || ""
-                }`}
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label>Dirección:</label>
-              <input
-                type="text"
-                value={dataSteepOne.receiverData?.address || ""}
-                readOnly
-              />
-            </div>
+                <div className="col-md-6">
+                  <label>Dirección:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={dataSteepOne.receiverData?.address || ""}
+                    readOnly
+                  />
+                </div>
+                <h5 className="mt-3">Datos de Envio:</h5>
+                <div className="col-md-3">
+                  <label>Lote:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={dataSteepTwo?.batchNumber || ""}
+                    readOnly
+                  />
+                </div>
 
-            {/* Detalles del Envío */}
-            <div className="form-group">
-              <label>Lote:</label>
-              <input
-                type="text"
-                value={dataSteepTwo?.batchNumber || ""}
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label>Número de Envío:</label>
-              <input
-                type="text"
-                value={dataSteepThree?.shipmentNumber || ""}
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label>Total Cajas:</label>
-              <input
-                type="text"
-                value={dataSteepThree?.totalBoxes || ""}
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label>Peso Total (lbs):</label>
-              <input
-                type="text"
-                value={dataSteepThree?.totalWeight || ""}
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label>Volumen Total (ft³):</label>
-              <input
-                type="text"
-                value={dataSteepThree?.totalVolume || ""}
-                readOnly
-              />
-            </div>
+                <div className="col-md-3">
+                  <label>Número de Envío:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={dataSteepThree?.shipmentNumber || ""}
+                    readOnly
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label>Tipo de Envío:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={dataSteepThree?.shipmentType || ""}
+                    readOnly
+                  />
+                </div>
+              </div>
 
-            {/* Pago y Seguro */}
-            <div className="form-group">
-              <label>Valor Declarado:</label>
-              <input
-                type="text"
-                value={dataSteepThree?.declaredValue || ""}
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label>Valor Pagado:</label>
-              <input
-                type="text"
-                value={dataSteepThree?.valuePaid || ""}
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label>Método de Pago:</label>
-              <select value={dataSteepThree?.paymentMethod || ""} disabled>
-                <option value="">Seleccione un método</option>
-                <option value="cash">Cash</option>
-                <option value="zelle">Zelle</option>
-                <option value="venmo">Venmo</option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
-            <div className="checkbox-group">
-              <label>Seguro:</label>
-              <input
-                type="checkbox"
-                checked={!!dataSteepThree?.insurance}
-                disabled
-              />
-              {dataSteepThree?.insurance && (
-                <input
-                  type="text"
-                  value={`$${
-                    dataSteepThree && dataSteepThree.insuranceAmount === "si"
-                      ? true
-                      : false
-                  }`}
-                  readOnly
-                />
-              )}
+              <div className="row mt-2">
+                <div className="col-md-2">
+                  <label>Total Cajas:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={dataSteepThree?.totalBoxes || ""}
+                    readOnly
+                  />
+                </div>
+
+                <div className="col-md-2">
+                  <label>Peso Total (lbs):</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={`${dataSteepThree?.totalWeight || ""} lbs`}
+                    readOnly
+                  />
+                </div>
+
+                <div className="col-md-2">
+                  <label>Volumen Total:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={`${dataSteepThree?.totalVolume || ""} ${
+                      dataSteepThree?.shipmentType === "Marítimo"
+                        ? "ft³"
+                        : "ft²"
+                    }`}
+                    readOnly
+                  />
+                </div>
+
+                <div className="col-md-3">
+                  <label>Método de Pago:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={dataSteepThree?.paymentMethod || ""}
+                    readOnly
+                  />
+                </div>
+                <div className="col-md-3">
+                  <label>Seguro:</label>
+                  <div className="d-flex align-items-center">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(
+                        dataSteepThree?.isWithEnsurance === "si"
+                      )}
+                      disabled
+                    />
+                    {dataSteepThree?.insurance && (
+                      <input
+                        type="text"
+                        className="form-control ms-2"
+                        value={
+                          dataSteepThree?.insuranceAmount === "si"
+                            ? `$${dataSteepThree.amount || 0}`
+                            : "$0.00"
+                        }
+                        readOnly
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="row mt-5"></div>
+              <div className="row">
+                <div className="col-md-8">
+                  <h3>Lista de Cajas:</h3>
+                  <ul className="boxes-list">
+                    {Array.isArray(dataSteepThree?.boxes) &&
+                    dataSteepThree.boxes.length > 0 ? (
+                      dataSteepThree.boxes.map((box, index) => (
+                        <li key={index}>
+                          <div className="box-item">
+                            {box.size} - {box?.weight} lbs
+                          </div>
+                        </li>
+                      ))
+                    ) : (
+                      <li>No hay cajas registradas</li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="row mt-2">
+                    <div className="col-md-6 offset-md-5">
+                      <label>Valor Declarado:</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={`$${dataSteepThree?.declaredValue || ""}`}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="col-md-6 offset-md-5">
+                      <label>Valor Pagado:</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={`$${dataSteepThree?.valuePaid || ""}`}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="modal-actions">
-          <Button
-            text="Cancelar"
-            color="#e63946"
-            onClick={() => setShowConfirmationModal(false)}
-          />
-          <Button text="Guardar" color="#38b000" onClick={handleSaveShipment} />
+          <div className=" modal-actions">
+            <Button
+              className=""
+              text="Cancelar"
+              color="#e63946"
+              onClick={() => setShowConfirmationModal(false)}
+            />
+            <Button
+              className="text-center"
+              text="Guardar"
+              color="#38b000"
+              onClick={handleSaveShipment}
+            />
+          </div>
         </div>
       </Modal>
     </div>
