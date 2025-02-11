@@ -13,12 +13,17 @@ import Swal from "sweetalert2";
 
 Modal.setAppElement("#root");
 
-const fetchShipments = async (page, search) => {
+const fetchShipments = async (page, search = "") => {
   const token =
     localStorage.getItem("token") || sessionStorage.getItem("token");
 
+  const queryParams = new URLSearchParams({
+    page: page,
+    search: encodeURIComponent(search.trim()), // Evita caracteres especiales en la URL
+  }).toString();
+
   const response = await fetch(
-    `http://localhost:5000/api/shipments?page=${page}&search=${search || ""}`,
+    `http://localhost:5000/api/shipments?${queryParams}`,
     {
       method: "GET",
       headers: {
@@ -28,10 +33,11 @@ const fetchShipments = async (page, search) => {
     }
   );
 
-  if (!response.ok) throw new Error("Failed to fetch shipments.");
+  if (!response.ok) {
+    throw new Error(`Error al obtener los envíos: ${response.statusText}`);
+  }
 
-  const result = await response.json();
-  return result;
+  return response.json();
 };
 
 const ListShipments = () => {

@@ -13,6 +13,7 @@ import Steep3 from "./steeps/Steep3";
 import Swal from "sweetalert2";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
@@ -23,6 +24,8 @@ const ShippingWizard = () => {
   const [dataSteepTwo, setDataSteepTwo] = useState([]);
   const [dataSteepThree, setDataSteepThree] = useState([]);
   const [showPDFContent, setShowPDFContent] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleNextStep = () => {
     setCurrentStep((prev) => Math.min(prev + 1, 3));
@@ -93,54 +96,49 @@ const ShippingWizard = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      console.log(dataSteepOne);
-      console.log(dataSteepTwo);
-      console.log(dataSteepThree);
+      const shipmentData = {
+        batchId: dataSteepTwo.id,
+        shipmentNumber: dataSteepThree.shipmentNumber,
+        clientId: dataSteepOne.clientData.id,
+        totalWeight: dataSteepThree.totalWeight,
+        totalVolume: dataSteepThree.totalVolume,
+        totalBoxes: dataSteepThree.totalBoxes,
+        status: "recibido en almacen",
+        receiverId: dataSteepOne.receiverData.id,
+        createdBy: 1,
+        updatedBy: 1,
+        insurance: dataSteepThree.isWithEnsurance,
+        paymentMethod: dataSteepThree.paymentMethod,
+        declaredValue: dataSteepThree.declaredValue,
+        valuePaid: dataSteepThree.valuePaid,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        boxes: JSON.stringify(dataSteepThree.boxes),
+      };
 
-      handleDownloadPDF();
+      const response = await fetch("http://localhost:5000/api/shipments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(shipmentData),
+      });
 
-      // const shipmentData = {
-      //   batchId: dataSteepTwo.id,
-      //   shipmentNumber: dataSteepThree.shipmentNumber,
-      //   clientId: dataSteepOne.clientData.id,
-      //   totalWeight: dataSteepThree.totalWeight,
-      //   totalVolume: dataSteepThree.totalVolume,
-      //   totalBoxes: dataSteepThree.totalBoxes,
-      //   status: "recibido en almacen",
-      //   receiverId: dataSteepOne.receiverData.id,
-      //   createdBy: 1,
-      //   updatedBy: 1,
-      //   insurance: dataSteepThree.isWithEnsurance,
-      //   paymentMethod: dataSteepThree.paymentMethod,
-      //   declaredValue: dataSteepThree.declaredValue,
-      //   valuePaid: dataSteepThree.valuePaid,
-      //   createdAt: new Date(),
-      //   updatedAt: new Date(),
-      //   boxes: JSON.stringify(dataSteepThree.boxes),
-      // };
+      if (response.ok) {
+        handleSendEmail(
+          shipmentData,
+          dataSteepOne.clientData,
+          dataSteepOne.receiverData
+        );
+        handleDownloadPDF();
+      }
 
-      // const response = await fetch("http://localhost:5000/api/shipments", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify(shipmentData),
-      // });
+      if (!response.ok) throw new Error("Error al guardar el envío.");
 
-      // if (response.ok) {
-      //   handleSendEmail(
-      //     shipmentData,
-      //     dataSteepOne.clientData,
-      //     dataSteepOne.receiverData
-      //   );
-      //}
-
-      // if (!response.ok) throw new Error("Error al guardar el envío.");
-
-      // Swal.fire("¡Éxito!", "El envío ha sido registrado.", "success");
-      // setShowConfirmationModal(false);
-      // Navigate("/envios");
+      Swal.fire("¡Éxito!", "El envío ha sido registrado.", "success");
+      setShowConfirmationModal(false);
+      navigate("/envios");
     } catch (error) {
       Swal.fire("Error", error.message, "error");
     }
