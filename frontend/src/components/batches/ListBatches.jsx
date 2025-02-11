@@ -158,8 +158,10 @@ const ListBatches = () => {
   };
 
   const handleEdit = (batch) => {
-    setSelectedBatch(batch); // Asegúrate de guardar el lote seleccionado.
-    setIsEditModalOpen(true); // Cambia el estado a 'true' para abrir la modal.
+    console.log("Abriendo modal para el batch:", batch);
+    setSelectedBatch(batch);
+    setIsEditModalOpen(true);
+    console.log("isEditModalOpen después de set:", isEditModalOpen); // <-- Esto debería mostrar true
   };
 
   const closeModal = () => {

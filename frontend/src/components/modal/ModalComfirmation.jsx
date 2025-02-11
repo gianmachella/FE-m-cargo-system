@@ -1,3 +1,5 @@
+import "./ModalConfirmation.css";
+
 import ButtonComponent from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Modal from "react-modal";

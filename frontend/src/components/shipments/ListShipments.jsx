@@ -8,6 +8,7 @@ import Button from "../button/Button";
 import { FormContainer } from "../form/Form";
 import Input from "../inputs/InputComponent";
 import Modal from "react-modal";
+import ModalEditShipment from "../modal/ModalEditShipment";
 import ReactPaginate from "react-paginate";
 import Swal from "sweetalert2";
 
@@ -251,57 +252,11 @@ const ListShipments = () => {
         activeClassName={"active"}
       />
 
-      <Modal
-        isOpen={isEditModalOpen}
-        onRequestClose={closeModal}
-        className="modal"
-        overlayClassName="modal-overlay"
-      >
-        {selectedShipment ? (
-          <FormContainer>
-            <h1>Editar Envío</h1>
-
-            <Input
-              label="Número de Envío"
-              value={selectedShipment.shipmentNumber}
-              onChange={(e) =>
-                setSelectedShipment({
-                  ...selectedShipment,
-                  shipmentNumber: e.target.value,
-                })
-              }
-            />
-
-            <Input
-              label="Estado"
-              value={selectedShipment.status}
-              onChange={(e) =>
-                setSelectedShipment({
-                  ...selectedShipment,
-                  status: e.target.value,
-                })
-              }
-            />
-
-            <div className="button-save">
-              <Button
-                text="Guardar"
-                onClick={() => updateShipment(selectedShipment)}
-                size="medium"
-                color="#57cc99"
-              />
-              <Button
-                text="Cancelar"
-                onClick={closeModal}
-                size="medium"
-                color="#e63946"
-              />
-            </div>
-          </FormContainer>
-        ) : (
-          <p>Cargando datos del envío...</p>
-        )}
-      </Modal>
+      <ModalEditShipment
+        isEditModalOpen={isEditModalOpen}
+        closeModal={closeModal}
+        setIsEditModalOpen={setIsEditModalOpen}
+      />
     </div>
   );
 };

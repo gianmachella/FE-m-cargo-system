@@ -5,8 +5,8 @@ import React, { useState } from "react";
 
 import { FaUser } from "react-icons/fa";
 import Modal from "react-modal";
-import ModalComfirmation from "./ModalComfirmation";
-import PDFFormat from "./PDFFormat";
+import ModalComfirmation from "../modal/ModalComfirmation";
+import PDFFormat from "../PDFformat/PDFFormat";
 import { Steep1 } from "./steeps/Steep1";
 import Steep2 from "./steeps/Steep2";
 import Steep3 from "./steeps/Steep3";
