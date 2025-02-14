@@ -1,6 +1,7 @@
 import { FormContainer, FormSection } from "../../form/Form";
 import React, { useEffect, useState } from "react";
 
+import Accordion from "../../acordion/Acordion";
 import ButtonComponent from "../../button/Button";
 import Input from "../../inputs/InputComponent";
 import Select from "../../select/SelectComponent";
@@ -66,110 +67,112 @@ export const Steep1 = (props) => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-
-      <div className="clients-list mb-3">
-        {clients && clients.length > 0 ? (
-          clients.map((client) => (
-            <div
-              key={client.id}
-              className="client-card"
-              onClick={() => handleClientSelect(client)}
-            >
-              <p>
-                {client.firstName} {client.lastName}
-              </p>
-              <p>{client.email}</p>
+      <Accordion title="Lista de Usuarios encontrados...">
+        <div className="clients-list mb-3">
+          {clients && clients.length > 0 ? (
+            clients.map((client) => (
+              <div
+                key={client.id}
+                className="client-card"
+                onClick={() => handleClientSelect(client)}
+              >
+                <p>
+                  {client.firstName} {client.lastName}
+                </p>
+                <p>{client.email}</p>
+              </div>
+            ))
+          ) : (
+            <p>No se encontraron clientes.</p>
+          )}
+        </div>
+      </Accordion>
+      <Accordion title="Datos del Cliente">
+        {selectedClient && (
+          <FormSection title="Datos del Cliente">
+            <div className="form-par">
+              <Input
+                label="Nombre"
+                value={selectedClient.firstName}
+                inputText={selectedClient.firstName}
+                disabled
+              />
+              <Input
+                label="Apellido"
+                value={selectedClient.lastName}
+                inputText={selectedClient.lastName}
+                disabled
+              />
             </div>
-          ))
-        ) : (
-          <p>No se encontraron clientes.</p>
+            <div className="form-par">
+              <Input
+                label="Teléfono"
+                value={selectedClient.phone}
+                inputText={selectedClient.phone}
+                disabled
+              />
+              <Input
+                label="Email"
+                value={selectedClient.email}
+                inputText={selectedClient.email}
+                disabled
+              />
+            </div>
+            <Select
+              label="Seleccionar Receptor"
+              value={selectedReceiver?.id}
+              width="300px"
+              options={(Array.isArray(receivers) ? receivers : []).map(
+                (receiver) => ({
+                  value: receiver.id,
+                  label: `${receiver.firstName} ${receiver.lastName}`,
+                })
+              )}
+              onChange={(e) => handleReceiverSelect(e.target.value)}
+            />
+          </FormSection>
         )}
-      </div>
-
-      {selectedClient && (
-        <FormSection title="Datos del Cliente">
-          <div className="form-par">
+      </Accordion>
+      <Accordion title="Datos de Receptor">
+        {selectedReceiver && (
+          <FormSection title="Datos del Receptor">
+            <div className="form-par">
+              <Input
+                label="Nombre"
+                value={selectedReceiver.firstName}
+                inputText={selectedReceiver.firstName}
+                disabled
+              />
+              <Input
+                label="Apellido"
+                value={selectedReceiver.lastName}
+                inputText={selectedReceiver.lastName}
+                disabled
+              />
+            </div>
+            <div className="form-par">
+              <Input
+                label="Teléfono"
+                value={selectedReceiver.phone}
+                inputText={selectedReceiver.phone}
+                disabled
+              />
+              <Input
+                label="País"
+                value={selectedReceiver.country}
+                inputText={selectedReceiver.country}
+                disabled
+              />
+            </div>
             <Input
-              label="Nombre"
-              value={selectedClient.firstName}
-              inputText={selectedClient.firstName}
+              label="Dirección"
+              value={selectedReceiver.address}
+              inputText={selectedReceiver.address}
               disabled
             />
-            <Input
-              label="Apellido"
-              value={selectedClient.lastName}
-              inputText={selectedClient.lastName}
-              disabled
-            />
-          </div>
-          <div className="form-par">
-            <Input
-              label="Teléfono"
-              value={selectedClient.phone}
-              inputText={selectedClient.phone}
-              disabled
-            />
-            <Input
-              label="Email"
-              value={selectedClient.email}
-              inputText={selectedClient.email}
-              disabled
-            />
-          </div>
-          <Select
-            label="Seleccionar Receptor"
-            value={selectedReceiver?.id}
-            width="300px"
-            options={(Array.isArray(receivers) ? receivers : []).map(
-              (receiver) => ({
-                value: receiver.id,
-                label: `${receiver.firstName} ${receiver.lastName}`,
-              })
-            )}
-            onChange={(e) => handleReceiverSelect(e.target.value)}
-          />
-        </FormSection>
-      )}
-
-      {selectedReceiver && (
-        <FormSection title="Datos del Receptor">
-          <div className="form-par">
-            <Input
-              label="Nombre"
-              value={selectedReceiver.firstName}
-              inputText={selectedReceiver.firstName}
-              disabled
-            />
-            <Input
-              label="Apellido"
-              value={selectedReceiver.lastName}
-              inputText={selectedReceiver.lastName}
-              disabled
-            />
-          </div>
-          <div className="form-par">
-            <Input
-              label="Teléfono"
-              value={selectedReceiver.phone}
-              inputText={selectedReceiver.phone}
-              disabled
-            />
-            <Input
-              label="País"
-              value={selectedReceiver.country}
-              inputText={selectedReceiver.country}
-              disabled
-            />
-          </div>
-          <Input
-            label="Dirección"
-            value={selectedReceiver.address}
-            inputText={selectedReceiver.address}
-            disabled
-          />
-        </FormSection>
-      )}
-
+          </FormSection>
+        )}
+      </Accordion>
       <ButtonComponent
         text="Siguiente"
         color="#57cc99"
