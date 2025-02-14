@@ -1,7 +1,7 @@
 import "./ShippingWizard.css";
 
 import { BsBox2, BsBoxes } from "react-icons/bs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { FaUser } from "react-icons/fa";
 import Modal from "react-modal";
@@ -33,42 +33,6 @@ const ShippingWizard = () => {
 
   const handlePreviousStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleDownloadPDF = async () => {
-    setShowPDFContent(true); // Mostrar temporalmente
-
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Dar tiempo a renderizar
-
-    const pdfContent = document.getElementById("pdf-content");
-
-    if (!pdfContent) {
-      console.error("No se encontró el elemento pdf-content");
-      Swal.fire("Error", "No se pudo generar el PDF.", "error");
-      setShowPDFContent(false);
-      return;
-    }
-
-    html2canvas(pdfContent, {
-      scale: 2,
-      useCORS: true,
-    })
-      .then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-        const imgWidth = 190;
-        let imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-        pdf.save(`confirmacion_envio-${dataSteepThree.shipmentNumber}.pdf`);
-
-        setShowPDFContent(false); // Ocultar después de capturar
-      })
-      .catch((error) => {
-        console.error("Error al generar el PDF:", error);
-        Swal.fire("Error", "Hubo un problema al generar el PDF.", "error");
-        setShowPDFContent(false);
-      });
   };
 
   const handleSendEmail = async (shipmentData, clientData, receiverData) => {
@@ -116,6 +80,10 @@ const ShippingWizard = () => {
         boxes: JSON.stringify(dataSteepThree.boxes),
       };
 
+      console.log(dataSteepOne);
+      console.log(dataSteepTwo);
+      console.log(dataSteepThree);
+
       const response = await fetch("http://localhost:5000/api/shipments", {
         method: "POST",
         headers: {
@@ -125,22 +93,53 @@ const ShippingWizard = () => {
         body: JSON.stringify(shipmentData),
       });
 
-      if (response.ok) {
-        handleSendEmail(
-          shipmentData,
-          dataSteepOne.clientData,
-          dataSteepOne.receiverData
-        );
-        handleDownloadPDF();
-      }
-
       if (!response.ok) throw new Error("Error al guardar el envío.");
 
       Swal.fire("¡Éxito!", "El envío ha sido registrado.", "success");
+
+      setShowPDFContent(true);
+
+      handleSendEmail(
+        shipmentData,
+        dataSteepOne.clientData,
+        dataSteepOne.receiverData
+      );
+
       setShowConfirmationModal(false);
-      navigate("/envios");
+      handleDownloadPDF();
+      setTimeout(() => {
+        navigate("/envios");
+      }, 3000);
     } catch (error) {
       Swal.fire("Error", error.message, "error");
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    const pdfContent = document.getElementById("pdf-content");
+
+    if (!pdfContent) {
+      Swal.fire(
+        "Error",
+        "No se pudo generar el PDF porque el contenido no existe.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(pdfContent, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 190;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.save(`confirmacion_envio-${dataSteepThree.shipmentNumber}.pdf`);
+    } catch (error) {
+      Swal.fire("Error", "Hubo un problema al generar el PDF.", "error");
+    } finally {
+      setShowPDFContent(false);
     }
   };
 

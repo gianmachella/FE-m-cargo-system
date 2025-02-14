@@ -230,10 +230,10 @@ const ListBatches = () => {
       ) : batches.length > 0 ? (
         <table {...getTableProps()} className="batches-table">
           <thead>
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()}>
+            {headerGroups.map((headerGroup, index) => (
+              <tr key={index} {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column, colIndex) => (
+                  <th key={colIndex} {...column.getHeaderProps()}>
                     {column.render("Header")}
                   </th>
                 ))}
@@ -246,11 +246,11 @@ const ListBatches = () => {
                 <td colSpan="6">No se encontraron lotes.</td>
               </tr>
             )}
-            {rows.map((row) => {
+            {rows.map((row, rowIndex) => {
               prepareRow(row);
               console.log("Rendering row:", row.original); // Verifica si llega el lote aquí
               return (
-                <tr {...row.getRowProps()}>
+                <tr key={rowIndex} {...row.getRowProps()}>
                   {row.cells.map((cell) => (
                     <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
                   ))}

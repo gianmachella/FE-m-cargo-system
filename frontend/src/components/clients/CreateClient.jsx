@@ -98,6 +98,8 @@ const CreateClient = (props) => {
                 telefono: receptorTelefono,
                 direccion: receptorDireccion,
                 pais: receptorPais,
+                city: receptorCity,
+                state: receptorState,
               }
             : receptor
         );
@@ -112,6 +114,8 @@ const CreateClient = (props) => {
             telefono: receptorTelefono,
             direccion: receptorDireccion,
             pais: receptorPais,
+            city: receptorCity,
+            state: receptorState,
           },
         ]);
       }
@@ -155,6 +159,8 @@ const CreateClient = (props) => {
   };
 
   const handleSendEmail = async (clientData) => {
+    console.log(clientData);
+
     const response = await fetch("http://localhost:5000/api/send-email", {
       method: "POST",
       headers: {
@@ -163,7 +169,7 @@ const CreateClient = (props) => {
       body: JSON.stringify({
         to: clientData.email,
         data: clientData,
-        subject: `Bienvenido ${clientData.firstName} ${clientData.lastName}}`,
+        subject: `Bienvenido ${clientData.firstName} ${clientData.lastName}`,
         type: "newClient",
       }),
     });
@@ -197,13 +203,15 @@ const CreateClient = (props) => {
       lastName: apellido,
       phone: telefono,
       email,
-      createdBy: 1, // Asegúrate de que este ID sea dinámico
+      createdBy: 1,
       receivers: receptores.map((receptor) => ({
         firstName: receptor.nombre,
         lastName: receptor.apellido,
         phone: receptor.telefono,
         address: receptor.direccion,
         country: receptor.pais,
+        state: receptor.state,
+        city: receptor.city,
       })),
     };
 
@@ -226,7 +234,7 @@ const CreateClient = (props) => {
         });
 
         handleSendEmail(clientData);
-        resetForm(); // Limpia el formulario
+        resetForm();
       } else {
         const errorData = await response.json();
         Swal.fire({

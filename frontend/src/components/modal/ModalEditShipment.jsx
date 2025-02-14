@@ -1,9 +1,11 @@
 import "./ModalEditShipment.css";
 
+import React, { useEffect, useState } from "react";
+
 import ButtonComponent from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Modal from "react-modal";
-import React from "react";
+import { formatarFecha } from "../../utilities/utilities";
 
 Modal.setAppElement("#root");
 const ModalEditShipment = (props) => {
@@ -11,11 +13,14 @@ const ModalEditShipment = (props) => {
     isEditModalOpen,
     closeModal,
     setIsEditModalOpen,
-    dataSteepOne,
-    dataSteepTwo,
-    dataSteepThree,
+    shipmentData,
     handleSaveShipment,
   } = props;
+  const [boxes, setBoxes] = useState([]);
+
+  useEffect(() => {
+    if (shipmentData) setBoxes(JSON.parse(shipmentData.boxes));
+  }, [shipmentData]);
 
   return (
     <Modal
@@ -26,67 +31,72 @@ const ModalEditShipment = (props) => {
         isEditModalOpen ? "modal-overlay--open" : ""
       }`}
     >
-      <div className="row">
-        <h2 className="col-md-6 modal-title ">Editar Envío</h2>
+      <div className="row m-3">
+        <h2 className="col-md-12 modal-title mb-3">Editar Envío</h2>
+        <h6 className="col-md-12 ">
+          Envio creado: {formatarFecha(shipmentData?.createdAt)}
+        </h6>
+        <h6 className="col-md-12 ">
+          Estatus del envio: {shipmentData?.status}
+        </h6>
       </div>
       <div id="modal-content-pdf mb-5">
         <div className="modal-content">
           <div className="container">
             <div className="row">
               <h5 className="col-md-12 mt-3">Datos del Remitente:</h5>
-              <div className="col-md-5">
+              <div className="col-md-3">
                 <Input
-                  label="Nombre completo"
-                  inputText={`${dataSteepOne?.clientData?.firstName || ""} ${
-                    dataSteepOne?.clientData?.lastName || ""
-                  }`}
+                  label="Nombre"
+                  inputText={shipmentData?.client?.firstName}
+                />
+              </div>
+              <div className="col-md-3">
+                <Input
+                  label="Apellido"
+                  inputText={shipmentData?.client?.lastName}
                 />
               </div>
               <div className="col-md-3">
                 <Input
                   label="Telefono"
-                  inputText={`${dataSteepOne?.clientData?.phone}`}
+                  inputText={shipmentData?.client?.phone}
                 />
               </div>
-              <div className="col-md-4">
-                <Input
-                  label="Email "
-                  inputText={`${dataSteepOne?.clientData?.email}`}
-                />
+              <div className="col-md-3">
+                <Input label="Email " inputText={shipmentData?.client?.email} />
               </div>
 
               <h5 className="col-md-12 mt-3">Datos del Receptor:</h5>
 
-              <div className="col-md-5">
+              <div className="col-md-3">
                 <Input
-                  label="Nombre completo"
-                  inputText={`${dataSteepOne?.receiverData?.firstName || ""} ${
-                    dataSteepOne?.clientData?.lastName || ""
-                  }`}
+                  label="Nombre"
+                  inputText={shipmentData?.receiver?.firstName}
+                />
+              </div>
+              <div className="col-md-3">
+                <Input
+                  label="Apellido"
+                  inputText={shipmentData?.receiver?.lastName}
                 />
               </div>
               <div className="col-md-3">
                 <Input
                   label="Telefono"
-                  inputText={`${dataSteepOne?.receiverData?.phone}`}
+                  inputText={shipmentData?.receiver?.phone}
                 />
               </div>
-              <div className="col-md-4">
-                <Input
-                  label="Email "
-                  inputText={`${dataSteepOne?.receiverData?.email}`}
-                />
-              </div>
-              <div className="col-md-10">
-                <Input
-                  label="Direccion"
-                  inputText={`${dataSteepOne?.receiverData?.address}`}
-                />
-              </div>
-              <div className="col-md-2">
+              <div className="col-md-3">
                 <Input
                   label="Pais"
-                  inputText={`${dataSteepOne?.receiverData?.country}`}
+                  inputText={shipmentData?.batch?.destinationCountry}
+                />
+              </div>
+              <div className="col-md-9">
+                <Input
+                  label="Direccion"
+                  inputText={`${shipmentData?.receiver?.address}, ${shipmentData?.batch?.destinationCountry}`}
                 />
               </div>
 
@@ -95,20 +105,20 @@ const ModalEditShipment = (props) => {
               <div className="col-md-3">
                 <Input
                   label="Lote"
-                  inputText={`${dataSteepTwo?.batchNumber}`}
+                  inputText={shipmentData?.batch?.batchNumber}
                 />
               </div>
 
               <div className="col-md-3">
                 <Input
                   label="Numero de Envio"
-                  inputText={`${dataSteepThree?.shipmentNumber}`}
+                  inputText={shipmentData?.shipmentNumber}
                 />
               </div>
               <div className="col-md-3">
                 <Input
                   label="Tipo de Envio"
-                  inputText={`${dataSteepThree?.shipmentType}`}
+                  inputText={shipmentData?.shipmentType}
                 />
               </div>
             </div>
@@ -117,22 +127,22 @@ const ModalEditShipment = (props) => {
               <div className="col-md-2">
                 <Input
                   label="Total de cajas"
-                  inputText={`${dataSteepThree?.totalBoxes}`}
+                  inputText={shipmentData?.totalBoxes}
                 />
               </div>
 
               <div className="col-md-2">
                 <Input
                   label="Total de peso"
-                  inputText={`${dataSteepThree?.totalWeight || ""} lbs`}
+                  inputText={`${shipmentData?.totalWeight || ""} lbs`}
                 />
               </div>
 
               <div className="col-md-2">
                 <Input
                   label="Total de volumen"
-                  inputText={`${dataSteepThree?.totalVolume || ""} ${
-                    dataSteepThree?.shipmentType === "Marítimo" ? "ft³" : "ft²"
+                  inputText={`${shipmentData?.totalVolume || ""} ${
+                    shipmentData?.shipmentType === "Marítimo" ? "ft³" : "ft²"
                   }`}
                 />
               </div>
@@ -140,7 +150,7 @@ const ModalEditShipment = (props) => {
               <div className="col-md-3">
                 <Input
                   label="Metodo de pago"
-                  inputText={`${dataSteepThree?.paymentMethod}`}
+                  inputText={`${shipmentData?.paymentMethod}`}
                 />
               </div>
               <div className="col-md-2">
@@ -148,14 +158,13 @@ const ModalEditShipment = (props) => {
                 <div className="d-flex align-items-center">
                   <input
                     type="checkbox"
-                    checked={Boolean(dataSteepThree?.isWithEnsurance === "si")}
-                    disabled
+                    checked={Boolean(shipmentData?.isWithEnsurance === "si")}
                   />
-                  {dataSteepThree?.isWithEnsurance && (
+                  {shipmentData?.isWithEnsurance && (
                     <Input
                       inputText={
-                        dataSteepThree?.insuranceAmount === "si"
-                          ? `$${dataSteepThree.amount || 0}`
+                        shipmentData?.insuranceAmount === "si"
+                          ? `$${shipmentData.amount || 0}`
                           : "$0.00"
                       }
                     />
@@ -168,9 +177,8 @@ const ModalEditShipment = (props) => {
               <div className="col-md-8">
                 <h3>Lista de Cajas:</h3>
                 <ul className="boxes-list">
-                  {Array.isArray(dataSteepThree?.boxes) &&
-                  dataSteepThree.boxes.length > 0 ? (
-                    dataSteepThree.boxes.map((box, index) => (
+                  {Array.isArray(boxes) && boxes.length > 0 ? (
+                    boxes.map((box, index) => (
                       <li key={index}>
                         <div className="box-item">
                           {box.size} - {box?.weight} lbs
@@ -188,14 +196,14 @@ const ModalEditShipment = (props) => {
                   <div className="col-md-6 offset-md-5">
                     <Input
                       label="Valor declarado"
-                      inputText={`$${dataSteepThree?.declaredValue}`}
+                      inputText={`$${shipmentData?.declaredValue}`}
                     />
                   </div>
 
                   <div className="col-md-6 offset-md-5">
                     <Input
                       label="Valor pagado"
-                      inputText={`$${dataSteepThree?.valuePaid}`}
+                      inputText={`$${shipmentData?.valuePaid}`}
                     />
                   </div>
                 </div>

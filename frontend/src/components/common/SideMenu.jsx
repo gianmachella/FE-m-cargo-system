@@ -41,6 +41,33 @@ const SideMenu = ({ collapsed }) => {
       }
     >
       <ul className="menu">
+        {/* Clientes */}
+        <li
+          className="item-menu-sidebar"
+          onClick={() => handleShowMenu("customer")}
+        >
+          <BsPeopleFill className="icon-menu" />
+          {!collapsedMenu && key?.admin_sidemenu_item_users}
+        </li>
+        <ul
+          className={`submenu${
+            activeMenu === "customer" ? " submenu-active" : ""
+          }`}
+        >
+          <Link className="text-item-menu" to="/clientes/crear">
+            <li className="item-menu-sidebar">
+              <BsPeopleFill className="icon-menu" />
+              {!collapsedMenu && key?.admin_sidemenu_item_create_user}
+            </li>
+          </Link>
+          <Link className="text-item-menu" to="/clientes">
+            <li className="item-menu-sidebar">
+              <BsPeopleFill className="icon-menu" />
+              Ver Clientes
+            </li>
+          </Link>
+        </ul>
+
         {/* Lotes */}
         <li className="item-menu-sidebar" onClick={() => handleShowMenu("lot")}>
           <BsBoxes className="icon-menu" />
@@ -84,33 +111,6 @@ const SideMenu = ({ collapsed }) => {
             <li className="item-menu-sidebar">
               <BsBox2 className="icon-menu" />
               {!collapsedMenu && key?.admin_sidemenu_item_consult_shipment}
-            </li>
-          </Link>
-        </ul>
-
-        {/* Clientes */}
-        <li
-          className="item-menu-sidebar"
-          onClick={() => handleShowMenu("customer")}
-        >
-          <BsPeopleFill className="icon-menu" />
-          {!collapsedMenu && key?.admin_sidemenu_item_users}
-        </li>
-        <ul
-          className={`submenu${
-            activeMenu === "customer" ? " submenu-active" : ""
-          }`}
-        >
-          <Link className="text-item-menu" to="/clientes/crear">
-            <li className="item-menu-sidebar">
-              <BsPeopleFill className="icon-menu" />
-              {!collapsedMenu && key?.admin_sidemenu_item_create_user}
-            </li>
-          </Link>
-          <Link className="text-item-menu" to="/clientes">
-            <li className="item-menu-sidebar">
-              <BsPeopleFill className="icon-menu" />
-              Ver Clientes
             </li>
           </Link>
         </ul>

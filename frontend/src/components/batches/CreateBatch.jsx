@@ -6,6 +6,7 @@ import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
+import { statusOptions } from "../../utilities/options";
 import { useNavigate } from "react-router-dom";
 
 const CreateBatch = () => {
@@ -98,11 +99,7 @@ const CreateBatch = () => {
             value={status}
             inputText={status}
             onChange={(e) => setStatus(e.target.value)}
-            options={[
-              { label: "En Proceso", value: "En Proceso" },
-              { label: "Completado", value: "Completado" },
-              { label: "Cancelado", value: "Cancelado" },
-            ]}
+            options={statusOptions}
           />
         </div>
 

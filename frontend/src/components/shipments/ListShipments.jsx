@@ -115,6 +115,8 @@ const ListShipments = () => {
   };
 
   const handleEdit = (shipment) => {
+    console.log(shipment);
+
     setSelectedShipment(shipment);
     setIsEditModalOpen(true);
   };
@@ -213,10 +215,10 @@ const ListShipments = () => {
       ) : shipments.length > 0 ? (
         <table {...getTableProps()} className="shipments-table">
           <thead>
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()}>
+            {headerGroups.map((headerGroup, index) => (
+              <tr key={index} {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column, colIndex) => (
+                  <th key={colIndex} {...column.getHeaderProps()}>
                     {column.render("Header")}
                   </th>
                 ))}
@@ -224,12 +226,14 @@ const ListShipments = () => {
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {rows.map((row) => {
+            {rows.map((row, rowIndex) => {
               prepareRow(row);
               return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                <tr key={rowIndex} {...row.getRowProps()}>
+                  {row.cells.map((cell, cellIndex) => (
+                    <td key={cellIndex} {...cell.getCellProps()}>
+                      {cell.render("Cell")}
+                    </td>
                   ))}
                 </tr>
               );
@@ -256,6 +260,7 @@ const ListShipments = () => {
         isEditModalOpen={isEditModalOpen}
         closeModal={closeModal}
         setIsEditModalOpen={setIsEditModalOpen}
+        shipmentData={selectedShipment}
       />
     </div>
   );

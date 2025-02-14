@@ -20,7 +20,8 @@ const Input = ({
   isValid = true,
   name = "",
   disabled = false,
-  width = "100%", // Nueva propiedad para personalizar el ancho
+  height = "auto",
+  width = "auto",
 }) => {
   const [inputValue, setInputValue] = useState(inputText);
   const [valid, setValid] = useState(isValid);
@@ -52,6 +53,8 @@ const Input = ({
           border: `${borderWidth}px solid ${
             valid ? borderColor.valid : borderColor.invalid
           }`,
+          height: height,
+          width: width,
         }}
       >
         {leadingIcon && <span className="input-icon">{leadingIcon}</span>}
@@ -63,6 +66,7 @@ const Input = ({
           onChange={handleChange}
           name={name}
           disabled={disabled}
+          style={{ height: "100%" }}
         />
         {trailingIcon && <span className="input-icon">{trailingIcon}</span>}
       </div>
@@ -99,7 +103,8 @@ Input.propTypes = {
   isValid: PropTypes.bool,
   name: PropTypes.string,
   disabled: PropTypes.bool,
-  width: PropTypes.string, // Validación del ancho personalizado
+  width: PropTypes.string,
+  height: PropTypes.string,
 };
 
 export default Input;
