@@ -1,4 +1,6 @@
-const newClientEmail = (name) => {
+const newClientEmail = (data) => {
+  console.log(data);
+
   return `
   <div style="background-color: #f5f5f5; padding: 20px;">
     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); font-family: Arial, sans-serif;">
@@ -12,9 +14,9 @@ const newClientEmail = (name) => {
       <!-- Main Content -->
       <tr>
         <td style="padding: 20px; text-align: center; color: #3b3a3c;">
-          <h2 style="margin-bottom: 10px;">¡Bienvenido ${name}!</h2>
+          <h2 style="margin-bottom: 10px;">¡Bienvenido ${data.firstName}!</h2>
           <p style="font-size: 16px; color: #737373;">
-            Estimado ${name}, <br> ¡Bienvenido a Global Cargo! 🎉 Gracias por registrarte con nosotros. Ahora puedes disfrutar de nuestros servicios de envíos con seguridad y confianza. Si necesitas asistencia, no dudes en contactarnos. ¡Estamos aquí para ayudarte!
+            Estimado ${data.firstName} ${data.lastName}, <br> ¡Bienvenido a Global Cargo! 🎉 Gracias por registrarte con nosotros. Ahora puedes disfrutar de nuestros servicios de envíos con seguridad y confianza. Si necesitas asistencia, no dudes en contactarnos. ¡Estamos aquí para ayudarte!
           </p>
         </td>
       </tr>

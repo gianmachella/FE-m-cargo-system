@@ -8,7 +8,7 @@ const sendEmail = async (req, res) => {
   const { to, data, type, subject, clientData, receiverData } = req.body;
 
   const emailTemplates = {
-    newClient: (data) => newClientEmail(data.name),
+    newClient: (data) => newClientEmail(data),
     newShipment: (data) => newShipmentEmail(data, clientData, receiverData),
   };
 

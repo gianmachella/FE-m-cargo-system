@@ -1,15 +1,17 @@
 const Client = require("../models/Client");
 const Shipment = require("../models/Shipment");
 const Batch = require("../models/Batch");
+const Receiver = require("../models/Receiver"); // ✅ Asegúrate de importar Receiver
+
 const { sequelize } = require("../config/db");
 const { Op } = require("sequelize");
 
 const getShipments = async (req, res) => {
   try {
     const { page = 1, limit = 10, search } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    const offset = (page - 1) * limit;
-    const whereCondition = search
+    const searchCondition = search
       ? {
           [Op.or]: [
             { shipmentNumber: { [Op.like]: `%${search}%` } },
@@ -18,26 +20,79 @@ const getShipments = async (req, res) => {
         }
       : {};
 
-    const shipments = await Shipment.findAndCountAll({
-      where: whereCondition,
+    const clientSearchCondition = search
+      ? {
+          [Op.or]: [
+            { firstName: { [Op.like]: `%${search}%` } },
+            { lastName: { [Op.like]: `%${search}%` } },
+            { phone: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const totalItems = await Shipment.count({
+      where: searchCondition,
+      include: [
+        {
+          model: Client,
+          as: "client",
+          where: clientSearchCondition,
+          required: false,
+        },
+        {
+          model: Receiver,
+          as: "receiver",
+          required: false,
+        },
+        {
+          model: Batch,
+          as: "batch",
+          required: false,
+        },
+      ],
+    });
+
+    const shipments = await Shipment.findAll({
+      where: searchCondition,
       include: [
         {
           model: Client,
           as: "client",
           attributes: ["id", "firstName", "lastName", "phone", "email"],
+          where: clientSearchCondition,
+          required: false,
+        },
+        {
+          model: Receiver,
+          as: "receiver",
+          attributes: ["id", "firstName", "lastName", "phone", "address"],
+          required: false,
+        },
+        {
+          model: Batch,
+          as: "batch",
+          attributes: [
+            "id",
+            "batchNumber",
+            "destinationCountry",
+            "status",
+            "shipmentType",
+          ],
+          required: false,
         },
       ],
       limit: parseInt(limit),
-      offset: parseInt(offset),
+      offset: offset,
     });
 
     res.json({
-      totalItems: shipments.count,
-      totalPages: Math.ceil(shipments.count / limit),
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
       currentPage: parseInt(page),
-      data: shipments.rows,
+      data: shipments,
     });
   } catch (error) {
+    console.error("Error al obtener envíos:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -46,7 +101,7 @@ const createShipment = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    console.log(req.body);
+    console.log("📩 Request Body:", req.body);
 
     const {
       shipmentNumber,
@@ -64,8 +119,8 @@ const createShipment = async (req, res) => {
       updatedAt,
       insurance,
       paymentMethod,
-      declaredValue,
-      valuePaid,
+      declaredValue, // ✅ Usar los nombres correctos
+      valuePaid, // ✅ Usar los nombres correctos
     } = req.body;
 
     const newShipment = await Shipment.create(
@@ -85,31 +140,17 @@ const createShipment = async (req, res) => {
         updatedAt,
         insurance,
         paymentMethod,
-        declaredValue,
-        valuePaid,
+        declaredValue, // ✅
+        valuePaid, // ✅
       },
       { transaction }
     );
-
-    const client = await Client.findByPk(clientId, {
-      include: [{ model: Shipment, as: "shipments" }],
-    });
-
-    const updatedShipments = client.shipments
-      ? [...client.shipments, shipmentNumber]
-      : [shipmentNumber];
-    await client.update({ shipments: updatedShipments }, { transaction });
-
-    const batch = await Batch.findByPk(batchId, { transaction });
-    const updatedBatchShipments = batch.shipments
-      ? [...batch.shipments, shipmentNumber]
-      : [shipmentNumber];
-    await batch.update({ shipments: updatedBatchShipments }, { transaction });
 
     await transaction.commit();
     res.status(201).json(newShipment);
   } catch (error) {
     await transaction.rollback();
+    console.error("❌ Error al crear envío:", error);
     res.status(500).json({ message: error.message });
   }
 };

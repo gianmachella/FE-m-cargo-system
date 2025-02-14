@@ -17,9 +17,12 @@ const sequelize = new Sequelize(
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log("Database connected successfully");
+    console.log("✅ Database connected successfully");
+
+    await sequelize.sync({ alter: true });
+    console.log("📌 Database synced with alter: true");
   } catch (error) {
-    console.error("Database connection failed:", error.message);
+    console.error("❌ Database connection failed:", error.message);
     process.exit(1);
   }
 };

@@ -7,6 +7,10 @@ const Receiver = sequelize.define("Receiver", {
     autoIncrement: true,
     primaryKey: true,
   },
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
   firstName: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -19,17 +23,21 @@ const Receiver = sequelize.define("Receiver", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   address: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
-  country: {
+  city: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
-  clientId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+  state: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 });
 

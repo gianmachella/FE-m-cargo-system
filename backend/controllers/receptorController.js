@@ -1,11 +1,10 @@
 const Receiver = require("../models/Receiver");
-// Asegúrate de que esta función esté definida correctamente
 const getReceptorsByClientId = async (req, res) => {
-  const { clientId } = req.params; // Extrae el ID del cliente desde los parámetros de la solicitud.
+  const { clientId } = req.params;
 
   try {
     const receivers = await Receiver.findAll({
-      where: { clientId }, // Verifica que se esté usando el `clientId` como filtro.
+      where: { clientId },
     });
 
     if (receivers.length === 0) {
@@ -27,7 +26,6 @@ const createReceiver = async (req, res) => {
   const { firstName, lastName, phone, address, country, clientId } = req.body;
 
   try {
-    // Validamos los datos necesarios
     if (
       !firstName ||
       !lastName ||
@@ -41,7 +39,6 @@ const createReceiver = async (req, res) => {
         .json({ message: "Todos los campos son obligatorios." });
     }
 
-    // Creamos el receptor en la base de datos
     const newReceiver = await Receptor.create({
       firstName,
       lastName,
@@ -49,9 +46,11 @@ const createReceiver = async (req, res) => {
       address,
       country,
       clientId,
+      state,
+      city,
     });
 
-    return res.status(201).json(newReceiver); // Devolvemos el receptor creado
+    return res.status(201).json(newReceiver);
   } catch (error) {
     console.error("Error al crear el receptor:", error);
     return res.status(500).json({ message: "Error al crear el receptor." });
@@ -68,14 +67,13 @@ const updateReceiver = async (req, res) => {
       return res.status(404).json({ message: "Receptor no encontrado" });
     }
 
-    // Actualizamos los datos del receptor
     receiver.firstName = firstName;
     receiver.lastName = lastName;
     receiver.phone = phone;
     receiver.address = address;
     receiver.country = country;
 
-    await receiver.save(); // Guardamos los cambios en la base de datos
+    await receiver.save();
 
     return res.status(200).json({ message: "Receptor actualizado", receiver });
   } catch (error) {
@@ -84,5 +82,4 @@ const updateReceiver = async (req, res) => {
   }
 };
 
-// Exportamos la función correctamente
 module.exports = { getReceptorsByClientId, createReceiver, updateReceiver };

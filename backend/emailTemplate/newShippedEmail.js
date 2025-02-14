@@ -12,10 +12,10 @@ const newShippedEmail = (data, clientData, receiverData) => {
     <!-- Main Content -->
     <tr>
       <td style="padding: 20px; color: #3b3a3c;">
-      <h1 style="text-align: center;">�� Envío Confirmado</h1>
+      <h1 style="text-align: center;"></h1>Envío Confirmado</h1>
       <p style="font-size: 16px; color: #737373;">Hola ${
         clientData.firstName
-      } tu envio esta registrado con el numero:</p>
+      } tu envio esta registrado.</p>
       <p style="font-size: 20px; color:rgb(51, 51, 51);">Número de Envío: ${
         data.shipmentNumber
       }</p>
