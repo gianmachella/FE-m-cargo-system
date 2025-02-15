@@ -90,3 +90,7 @@ export const countryOptions = [
   { label: "Uruguay", value: "Uruguay" },
   { label: "Venezuela", value: "Venezuela" },
 ];
+
+export const companyOptions = [
+  { label: "Global Cargo", value: "global-cargo" },
+];

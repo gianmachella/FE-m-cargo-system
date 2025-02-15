@@ -57,7 +57,7 @@ const SideMenu = ({ collapsed }) => {
           <Link className="text-item-menu" to="/clientes/crear">
             <li className="item-menu-sidebar">
               <BsPeopleFill className="icon-menu" />
-              {!collapsedMenu && key?.admin_sidemenu_item_create_user}
+              {!collapsedMenu && key?.admin_sidemenu_item_create_client}
             </li>
           </Link>
           <Link className="text-item-menu" to="/clientes">
@@ -120,10 +120,25 @@ const SideMenu = ({ collapsed }) => {
           <BsBarChartLineFill className="icon-menu" />
           {!collapsedMenu && key?.admin_sidemenu_item_statistics}
         </li>
-        <li className="item-menu-sidebar">
+        <li
+          className="item-menu-sidebar"
+          onClick={() => handleShowMenu("settings")}
+        >
           <BsFillGearFill className="icon-menu" />
           {!collapsedMenu && key?.admin_sidemenu_item_settings}
         </li>
+        <ul
+          className={`submenu${
+            activeMenu === "settings" ? " submenu-active" : ""
+          }`}
+        >
+          <Link className="text-item-menu" to="/register-user">
+            <li className="item-menu-sidebar">
+              <BsBox2 className="icon-menu" />
+              {!collapsedMenu && key?.admin_sidemenu_item_create_user}
+            </li>
+          </Link>
+        </ul>
       </ul>
 
       {/* Pie de página */}

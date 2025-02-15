@@ -3,12 +3,12 @@ import "./CreateClient.css";
 import { BsFillPencilFill, BsX } from "react-icons/bs";
 import { FormContainer, FormSection } from "../form/Form";
 import React, { useEffect, useState } from "react";
-import { countryOptions, shipmentTypeOptions } from "../../utilities/options";
 
 import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
+import { countryOptions } from "../../utilities/options";
 import { use } from "react";
 
 const CreateClient = (props) => {

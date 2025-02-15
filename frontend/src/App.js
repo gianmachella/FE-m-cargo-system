@@ -5,6 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import CreateBatch from "./components/batches/CreateBatch";
 import CreateClient from "./components/clients/CreateClient";
 import CreateShipment from "./components/shipments/CreateShipment";
+import CreateUser from "./components/auth/createUser/CreateUser";
 import Dashboard from "./pages/Dashboard";
 import { LanguageProvider } from "./contexts/Language.context";
 import ListBatches from "./components/batches/ListBatches";
@@ -23,6 +24,14 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route element={<PrivateRoute />}>
+              <Route
+                path="/register-user"
+                element={
+                  <MainLayout>
+                    <CreateUser />
+                  </MainLayout>
+                }
+              />
               <Route
                 path="/"
                 element={

@@ -7,7 +7,7 @@ const en = {
   admin_sidemenu_item_create_shipment: "Create Shipment",
   admin_sidemenu_item_consult_shipment: "Consult Shipment",
   admin_sidemenu_item_users: "Users",
-  admin_sidemenu_item_create_user: "Create User",
+  admin_sidemenu_item_create_client: "Create Client",
   admin_sidemenu_item_update_user: "Update User",
   admin_sidemenu_item_statistics: "Statistics",
   admin_sidemenu_item_settings: "Settings",
@@ -49,6 +49,7 @@ const en = {
   admin_text_update: "Update ",
   admin_text_update_volume: "Volume",
   admin_text_update_boxes: "Boxes",
+  admin_sidemenu_item_create_user: "User Create",
 };
 
 const es = {
@@ -59,7 +60,7 @@ const es = {
   admin_sidemenu_item_create_shipment: "Crear Envio",
   admin_sidemenu_item_consult_shipment: "Consultar Envio",
   admin_sidemenu_item_users: "Usuarios",
-  admin_sidemenu_item_create_user: "Crear Usuario",
+  admin_sidemenu_item_create_client: "Crear Cliente",
   admin_sidemenu_item_update_user: "Actualizar Usuario",
   admin_sidemenu_item_statistics: "Estadisticas",
   admin_sidemenu_item_settings: "Configuraciones",
@@ -103,6 +104,7 @@ const es = {
   admin_text_update: "Actualizar ",
   admin_text_update_volume: "Volumen",
   admin_text_update_boxes: "Cajas",
+  admin_sidemenu_item_create_user: "Crear Usuario",
 };
 
 export { en, es };

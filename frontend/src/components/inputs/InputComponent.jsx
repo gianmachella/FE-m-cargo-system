@@ -22,6 +22,7 @@ const Input = ({
   disabled = false,
   height = "auto",
   width = "auto",
+  required,
 }) => {
   const [inputValue, setInputValue] = useState(inputText);
   const [valid, setValid] = useState(isValid);
@@ -65,6 +66,7 @@ const Input = ({
           name={name}
           disabled={disabled}
           style={{ height: "100%" }}
+          required={required}
         />
         {trailingIcon && <span className="input-icon">{trailingIcon}</span>}
       </div>

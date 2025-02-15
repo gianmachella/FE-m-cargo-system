@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.js
 import { createContext, useEffect, useState } from "react";
 
 import jwtDecode from "jwt-decode";
@@ -10,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate(); // Llamar useNavigate al principio
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token =
@@ -21,20 +20,20 @@ export const AuthProvider = ({ children }) => {
         const decodedToken = jwtDecode(token);
 
         if (decodedToken.exp * 1000 < Date.now()) {
-          logout(); // Token expirado, cerrar sesión
+          logout();
         } else {
-          setUser(decodedToken); // Usuario autenticado
+          setUser(decodedToken);
         }
       } catch (error) {
         console.error("Invalid token", error);
-        logout(); // Token inválido
+        logout();
       }
     } else {
-      navigate("/login"); // Redirigir al login si no hay token
+      navigate("/login");
     }
 
-    setLoading(false); // Finaliza la carga inicial
-  }, [navigate]); // Asegura que useNavigate sea parte de las dependencias
+    setLoading(false);
+  }, [navigate]);
 
   const login = (token) => {
     const decodedToken = jwtDecode(token);
@@ -45,12 +44,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
-    navigate("/login"); // Redirigir al login después del logout
+    navigate("/login");
   };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-      {!loading && children} {/* Renderiza solo cuando termina la carga */}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

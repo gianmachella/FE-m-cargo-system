@@ -4,8 +4,12 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import React, { useContext, useEffect, useState } from "react";
 
 import { AuthContext } from "../../contexts/AuthContext";
+import ButtonComponent from "../button/Button";
+import Input from "../inputs/InputComponent";
 import Logo from "../../images/logos/logo.png";
+import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
+import { companyOptions } from "../../utilities/options";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -22,12 +26,11 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirigir si ya hay un token activo
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
     if (token) {
       login(token);
-      navigate("/"); // Redirige al dashboard u otra ruta segura
+      navigate("/");
     }
   }, [login, navigate]);
 
@@ -47,16 +50,15 @@ const Login = () => {
       if (response.ok) {
         const token = data.token;
 
-        // Guardar token en el almacenamiento correcto según la opción "remember me"
         if (rememberMe) {
           localStorage.setItem("token", token);
-          localStorage.setItem("rememberMe", "true"); // Guardar preferencia
+          localStorage.setItem("rememberMe", "true");
         } else {
           sessionStorage.setItem("token", token);
           localStorage.setItem("rememberMe", "false");
         }
 
-        login(token); // Actualiza el contexto de autenticación
+        login(token);
 
         Swal.fire({
           icon: "success",
@@ -95,21 +97,25 @@ const Login = () => {
         </div>
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
-            <input
-              type="email"
+            <Input
+              inputType="email"
               placeholder="Email"
               value={email}
+              inputText={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              width="100%"
             />
           </div>
 
           <div className="input-group password-group">
-            <input
-              type={showPassword ? "text" : "password"}
+            <Input
+              inputType={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
+              inputText={password}
               onChange={(e) => setPassword(e.target.value)}
+              width="100%"
               required
             />
             <span className="toggle-password" onClick={toggleShowPassword}>
@@ -118,20 +124,20 @@ const Login = () => {
           </div>
 
           <div className="input-group">
-            <select
+            <Select
               value={company}
+              placeholder="Selecciona una compania"
+              inputText={company}
               onChange={(e) => setCompany(e.target.value)}
+              options={companyOptions}
               required
-            >
-              <option value="">Selecciona una Compañía</option>
-              <option value="company1">Global Cargo</option>
-            </select>
+            />
           </div>
 
-          <div className="input-group">
-            <button className="login-button" type="submit" disabled={loading}>
+          <div className="button-login-area">
+            <ButtonComponent text="Login" size="medium" color="#57cc99">
               {loading ? "Logging in..." : "Login"}
-            </button>
+            </ButtonComponent>
           </div>
         </form>
       </div>
