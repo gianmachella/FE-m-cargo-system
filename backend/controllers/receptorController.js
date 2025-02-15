@@ -23,7 +23,16 @@ const getReceptorsByClientId = async (req, res) => {
 };
 
 const createReceiver = async (req, res) => {
-  const { firstName, lastName, phone, address, country, clientId } = req.body;
+  const {
+    firstName,
+    lastName,
+    phone,
+    address,
+    city,
+    state,
+    country,
+    clientId,
+  } = req.body;
 
   try {
     if (
@@ -39,15 +48,15 @@ const createReceiver = async (req, res) => {
         .json({ message: "Todos los campos son obligatorios." });
     }
 
-    const newReceiver = await Receptor.create({
+    const newReceiver = await Receiver.create({
       firstName,
       lastName,
       phone,
       address,
+      city,
+      state,
       country,
       clientId,
-      state,
-      city,
     });
 
     return res.status(201).json(newReceiver);
@@ -60,7 +69,8 @@ const createReceiver = async (req, res) => {
 const updateReceiver = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, phone, address, country } = req.body;
+    const { firstName, lastName, phone, address, city, state, country } =
+      req.body;
 
     const receiver = await Receiver.findByPk(id);
     if (!receiver) {
@@ -71,6 +81,8 @@ const updateReceiver = async (req, res) => {
     receiver.lastName = lastName;
     receiver.phone = phone;
     receiver.address = address;
+    receiver.city = city;
+    receiver.state = state;
     receiver.country = country;
 
     await receiver.save();

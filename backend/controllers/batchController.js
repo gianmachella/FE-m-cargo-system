@@ -1,5 +1,7 @@
 const { Op } = require("sequelize");
 const Batch = require("../models/Batch");
+const { sequelize } = require("../config/db");
+const Shipment = require("../models/Shipment"); // ✅ Importar modelo Shipment
 
 const getBatches = async (req, res) => {
   const { page = 1, limit = 10, search = "" } = req.query;
@@ -63,19 +65,92 @@ const getBatchById = async (req, res) => {
   }
 };
 
-// Actualizar un lote por su ID
 const updateBatch = async (req, res) => {
+  const transaction = await sequelize.transaction(); // ✅ Iniciar transacción
+
   try {
     const { id } = req.params;
-    const batch = await Batch.findByPk(id);
+    const { status } = req.body; // Extraer el nuevo estado del lote
+
+    const batch = await Batch.findByPk(id, {
+      include: [
+        {
+          model: Shipment,
+          as: "batchShipments", // ✅ Alias correcto
+        },
+      ],
+      transaction,
+    });
 
     if (!batch) {
       return res.status(404).json({ message: "Batch not found" });
     }
 
-    await batch.update(req.body);
-    res.json(batch);
+    // 🔹 Actualizar el estado del Batch
+    await batch.update({ status }, { transaction });
+
+    // 🔹 Si hay envíos asociados, actualizar sus estados también
+    if (batch.batchShipments && batch.batchShipments.length > 0) {
+      await Shipment.update(
+        { status }, // ✅ Se aplica el mismo estado del Batch
+        {
+          where: { batchId: id },
+          transaction,
+        }
+      );
+    }
+
+    await transaction.commit();
+    res.json({
+      message: "Batch and associated shipments updated successfully",
+      batch,
+    });
   } catch (error) {
+    await transaction.rollback();
+    console.error("❌ Error updating batch and shipments:", error);
+    res.status(500).json({ message: error.message });
+  }
+
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // Extraer el nuevo estado
+
+    const batch = await Batch.findByPk(id, {
+      include: [
+        {
+          model: Shipment,
+          as: "batchShipments", // Alias correcto usado en la asociación
+        },
+      ],
+      transaction,
+    });
+
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found" });
+    }
+
+    // 🔹 Actualizar el estado del Batch
+    await batch.update({ status }, { transaction });
+
+    // 🔹 Si hay envíos asociados, actualizar sus estados también
+    if (batch.batchShipments.length > 0) {
+      await Shipment.update(
+        { status }, // 🔹 Se aplica el mismo estado del Batch
+        {
+          where: { batchId: id },
+          transaction,
+        }
+      );
+    }
+
+    await transaction.commit();
+    res.json({
+      message: "Batch and associated shipments updated successfully",
+      batch,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("❌ Error updating batch and shipments:", error);
     res.status(500).json({ message: error.message });
   }
 };

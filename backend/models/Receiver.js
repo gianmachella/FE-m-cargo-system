@@ -39,6 +39,10 @@ const Receiver = sequelize.define("Receiver", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  country: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = Receiver;
