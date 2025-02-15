@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 
 import { FaUser } from "react-icons/fa";
 import Modal from "react-modal";
-import ModalComfirmation from "../modal/ModalComfirmation";
+import ModalConfirmation from "../modals/ModalConfirmation/ModalConfirmation";
 import PDFFormat from "../PDFformat/PDFFormat";
 import { Steep1 } from "./steeps/Steep1";
 import Steep2 from "./steeps/Steep2";
@@ -208,7 +208,7 @@ const ShippingWizard = () => {
           setShowConfirmationModal={setShowConfirmationModal}
         />
       )}
-      <ModalComfirmation
+      <ModalConfirmation
         showConfirmationModal={showConfirmationModal}
         setShowConfirmationModal={setShowConfirmationModal}
         dataSteepOne={dataSteepOne}

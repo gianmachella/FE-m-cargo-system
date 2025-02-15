@@ -50,9 +50,7 @@ const Input = ({
         style={{
           padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
           borderRadius: `${borderRadius}px`,
-          border: `${borderWidth}px solid ${
-            valid ? borderColor.valid : borderColor.invalid
-          }`,
+          border: `${borderWidth}px solid ${borderColor.valid}`,
           height: height,
           width: width,
         }}

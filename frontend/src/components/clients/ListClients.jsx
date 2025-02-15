@@ -1,18 +1,14 @@
-// ListClients.js
 import "./ListClients.css";
 
 import { FaPen, FaTrashCan } from "react-icons/fa6";
-import { FormContainer, FormSection } from "../form/Form";
 import React, { useEffect, useMemo, useState } from "react";
 import { useGlobalFilter, usePagination, useTable } from "react-table";
 
 import Button from "../button/Button";
-import Input from "../inputs/InputComponent";
-import Modal from "react-modal"; // Modal para editar/ver clientes
+import Modal from "react-modal";
+import ModalEditClient from "../modals/modalEditClient/ModalEditClient";
 import ReactPaginate from "react-paginate";
-import Select from "../select/SelectComponent";
-import Swal from "sweetalert2"; // SweetAlert para mensajes
-import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 Modal.setAppElement("#root");
 
@@ -45,33 +41,11 @@ const ListClients = () => {
   const [error, setError] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [receptors, setReceptors] = useState([]);
 
   const [isEditingReceiver, setIsEditingReceiver] = useState(false);
   const [isNewReceiver, setIsNewReceiver] = useState(false);
   const [receiverIndexToEdit, setReceiverIndexToEdit] = useState(null);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(null);
-
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [country, setCountry] = useState("");
-
-  const [receptorErrors, setReceptorErrors] = useState({});
-
-  const handleEditReceiver = (index) => {
-    if (receptors[index]) {
-      setReceiverIndexToEdit(index); // Guardamos el índice del receptor
-      setIsEditingReceiver(true); // Mostramos el formulario de edición
-    } else {
-      console.error("El receptor seleccionado no existe.");
-      Swal.fire("Error", "El receptor seleccionado no existe", "error");
-    }
-  };
 
   const fetchReceiversByClientId = async (clientId) => {
     try {
@@ -104,14 +78,14 @@ const ListClients = () => {
   };
 
   const handleEdit = async (client) => {
-    setSelectedClient({ ...client, receivers: client.receivers || [] }); // Asegurar que receivers sea un array
-    setIsEditModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedClient(null);
-    setIsEditModalOpen(false);
-    setIsViewModalOpen(false);
+    try {
+      const receivers = await fetchReceiversByClientId(client.id); // Carga receptores desde la API
+      setSelectedClient({ ...client, receivers }); // Guarda el cliente con sus receptores
+      setIsEditModalOpen(true); // Abre la modal
+    } catch (error) {
+      console.error("Error al cargar receptores:", error);
+      Swal.fire("Error", "No se pudieron cargar los receptores.", "error");
+    }
   };
 
   const handleDelete = async (clientId) => {
@@ -178,15 +152,19 @@ const ListClients = () => {
 
       if (!clientResponse.ok) throw new Error("Error al actualizar cliente.");
 
-      // Procesar receptores
       const receivers = selectedClient.receivers || [];
 
-      for (const receiver of receivers) {
-        if (receiver.id) {
-          await updateReceiver(receiver); // Actualizar receptor existente
-        } else {
-          await createReceiver({ ...receiver, clientId: selectedClient.id }); // Crear receptor nuevo
-        }
+      const existingReceivers = receivers.filter((receiver) => receiver.id);
+      for (const receiver of existingReceivers) {
+        console.log("Actualizando receptor:", receiver);
+        await updateReceiver(receiver);
+      }
+
+      const newReceivers = receivers.filter((receiver) => !receiver.id);
+
+      for (const newReceiver of newReceivers) {
+        console.log("Creando receptor:", newReceiver);
+        await createReceiver({ ...newReceiver, clientId: selectedClient.id });
       }
 
       Swal.fire(
@@ -216,7 +194,7 @@ const ListClients = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(receiver), // Asegúrate de que tiene clientId
+        body: JSON.stringify(receiver),
       });
 
       if (!response.ok) throw new Error("Error al crear receptor.");
@@ -258,7 +236,7 @@ const ListClients = () => {
 
       Swal.fire("Éxito", "Receptor actualizado con éxito", "success");
       setIsEditingReceiver(false);
-      loadClients(); // Recargar lista de clientes
+      loadClients();
     } catch (error) {
       Swal.fire(
         "Error",
@@ -282,15 +260,6 @@ const ListClients = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleReceiverChange = (index, field, value) => {
-    const updatedReceivers = [...receptors];
-    updatedReceivers[index] = {
-      ...updatedReceivers[index],
-      [field]: value, // Actualiza solo el campo modificado
-    };
-    setReceptors(updatedReceivers); // Guarda el estado actualizado
   };
 
   useEffect(() => {
@@ -352,32 +321,6 @@ const ListClients = () => {
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setPage(0);
-  };
-  const addReceptor = () => {
-    const newReceiver = {
-      firstName: firstName,
-      lastName: lastName,
-      phone: phone,
-      address: address,
-      country: country,
-    };
-
-    setSelectedClient((prevClient) => ({
-      ...prevClient,
-      receivers: [...(prevClient.receivers || []), newReceiver],
-    }));
-
-    resetReceptorForm();
-    setIsNewReceiver(false);
-  };
-
-  const resetReceptorForm = () => {
-    setFirstName("");
-    setLastName("");
-    setPhone("");
-    setAddress("");
-    setCountry("");
-    setReceptorErrors({});
   };
 
   return (
@@ -441,320 +384,14 @@ const ListClients = () => {
         containerClassName={"pagination"}
         activeClassName={"active"}
       />
-
-      <Modal
-        isOpen={isEditModalOpen}
-        onRequestClose={closeModal}
-        className={`modal ${isEditModalOpen ? "modal--open" : ""}`}
-        overlayClassName={`modal-overlay ${
-          isEditModalOpen ? "modal-overlay--open" : ""
-        }`}
-      >
-        {selectedClient ? (
-          <FormContainer>
-            <h1>{isEditing ? "Editar Cliente" : "Ver Cliente"}</h1>
-            <div className="form-wrapper-horizontal">
-              <div className="client-section">
-                <FormSection title={isEditing ? "Editar Cliente" : "Cliente"}>
-                  <Input
-                    disabled={!isEditing}
-                    label="Nombre"
-                    placeholder="Nombre"
-                    value={selectedClient.firstName || ""}
-                    inputText={selectedClient.firstName}
-                    onChange={(e) =>
-                      setSelectedClient({
-                        ...selectedClient,
-                        firstName: e.target.value,
-                      })
-                    }
-                  />
-                  <Input
-                    disabled={!isEditing}
-                    label="Apellido"
-                    placeholder="Apellido"
-                    value={selectedClient.lastName || ""}
-                    inputText={selectedClient.lastName}
-                    onChange={(e) =>
-                      setSelectedClient({
-                        ...selectedClient,
-                        lastName: e.target.value,
-                      })
-                    }
-                  />
-                  <Input
-                    disabled={!isEditing}
-                    label="Teléfono"
-                    placeholder="Teléfono"
-                    value={selectedClient.phone || ""}
-                    inputText={selectedClient.phone}
-                    onChange={(e) =>
-                      setSelectedClient({
-                        ...selectedClient,
-                        phone: e.target.value,
-                      })
-                    }
-                  />
-                  <Input
-                    disabled={!isEditing}
-                    label="Email"
-                    placeholder="Email"
-                    value={selectedClient.email || ""}
-                    inputText={selectedClient.email}
-                    onChange={(e) =>
-                      setSelectedClient({
-                        ...selectedClient,
-                        email: e.target.value,
-                      })
-                    }
-                  />
-                </FormSection>
-              </div>
-
-              <div className="receptor-section">
-                <div className="receptor-list">
-                  <h3>Receptores</h3>
-                  {receptors.length > 0 ? (
-                    receptors.map((receptor, index) => (
-                      <div key={index} className="receptor-item">
-                        <p>
-                          {receptor.firstName} {receptor.lastName} -{" "}
-                          {receptor.phone}
-                        </p>
-                        {isEditing && (
-                          <div className="receptor-edit">
-                            <Button
-                              onClick={() => handleEditReceiver(index)}
-                              size="extrasmall"
-                              color="#00b4d8"
-                              shape="circular"
-                              iconPosition="center"
-                              icon={<FaPen />}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p>No hay receptores registrados.</p>
-                  )}
-                  {isEditing && !isNewReceiver && (
-                    <Button
-                      onClick={() => setIsNewReceiver(true)}
-                      size="small"
-                      color="#00b4d8"
-                      text="Nuevo"
-                    />
-                  )}
-                </div>
-                {isEditingReceiver && (
-                  <FormSection
-                    title={isNewReceiver ? "Nuevo Receptor" : "Editar Receptor"}
-                  >
-                    <Input
-                      label="Nombre"
-                      placeholder="Nombre"
-                      value={
-                        receptors[receiverIndexToEdit]?.firstName || firstName
-                      }
-                      inputText={
-                        receptors[receiverIndexToEdit]?.firstName || firstName
-                      }
-                      onChange={(e) =>
-                        handleReceiverChange(
-                          receiverIndexToEdit,
-                          "firstName",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <Input
-                      label="Apellido"
-                      placeholder="Apellido"
-                      value={
-                        receptors[receiverIndexToEdit]?.lastName || lastName
-                      }
-                      inputText={
-                        receptors[receiverIndexToEdit]?.lastName || lastName
-                      }
-                      onChange={(e) =>
-                        handleReceiverChange(
-                          receiverIndexToEdit,
-                          "lastName",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <Input
-                      label="Teléfono"
-                      placeholder="Teléfono"
-                      value={receptors[receiverIndexToEdit]?.phone || phone}
-                      inputText={receptors[receiverIndexToEdit]?.phone || phone}
-                      onChange={(e) =>
-                        handleReceiverChange(
-                          receiverIndexToEdit,
-                          "phone",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <Input
-                      label="Dirección"
-                      placeholder="Dirección"
-                      value={receptors[receiverIndexToEdit]?.address || address}
-                      inputText={
-                        receptors[receiverIndexToEdit]?.address || address
-                      }
-                      onChange={(e) =>
-                        handleReceiverChange(
-                          receiverIndexToEdit,
-                          "address",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <Select
-                      label="País"
-                      value={receptors[receiverIndexToEdit]?.country || country}
-                      inputText={
-                        receptors[receiverIndexToEdit]?.country || country
-                      }
-                      onChange={(e) =>
-                        handleReceiverChange(
-                          receiverIndexToEdit,
-                          "country",
-                          e.target.value
-                        )
-                      }
-                      options={[
-                        { label: "Venezuela", value: "ven" },
-                        { label: "Colombia", value: "col" },
-                        { label: "Ecuador", value: "ecu" },
-                      ]}
-                    />
-
-                    <div className="button-receptor-edit">
-                      <Button
-                        text="Guardar Cambios"
-                        onClick={() =>
-                          updateReceiver(receptors[receiverIndexToEdit])
-                        }
-                        size="small"
-                        color={"#57cc99"}
-                      />
-                      <Button
-                        text="Cancelar"
-                        onClick={() => {
-                          setIsEditingReceiver(false);
-                          setIsNewReceiver(false);
-                        }}
-                        size="small"
-                        color="#e63946"
-                        textColor="white"
-                      />
-                    </div>
-                  </FormSection>
-                )}
-                {isNewReceiver && (
-                  <FormSection
-                    title={isNewReceiver ? "Nuevo Receptor" : "Editar Receptor"}
-                  >
-                    <Input
-                      label="Nombre"
-                      placeholder="Nombre"
-                      value={firstName}
-                      inputText={firstName}
-                      onChange={(e) => setFirstName(e.target.value)} // Cambiar a e.target.value
-                    />
-                    <Input
-                      label="Apellido"
-                      placeholder="Apellido"
-                      value={lastName}
-                      inputText={lastName}
-                      onChange={(e) => setLastName(e.target.value)} // Cambiar a e.target.value
-                    />
-                    <Input
-                      label="Teléfono"
-                      placeholder="Teléfono"
-                      value={phone}
-                      inputText={phone}
-                      onChange={(e) => setPhone(e.target.value)} // Cambiar a e.target.value
-                    />
-                    <Input
-                      label="Dirección"
-                      placeholder="Dirección"
-                      value={address}
-                      inputText={address}
-                      onChange={(e) => setAddress(e.target.value)} // Cambiar a e.target.value
-                    />
-                    <Select
-                      label="País"
-                      value={country}
-                      inputText={country}
-                      onChange={(e) => setCountry(e.target.value)} // Cambiar a e.target.value
-                      options={[
-                        { label: "Venezuela", value: "ven" },
-                        { label: "Colombia", value: "col" },
-                        { label: "Ecuador", value: "ecu" },
-                      ]}
-                    />
-
-                    <div className="button-receptor-edit">
-                      <Button
-                        text="Agregar"
-                        onClick={() => addReceptor()}
-                        size="small"
-                        color={isNewReceiver ? "#4cc9f0" : "#57cc99"}
-                      />
-                      <Button
-                        text="Cancelar"
-                        onClick={() => {
-                          setIsEditingReceiver(false);
-                          setIsNewReceiver(false);
-                        }}
-                        size="small"
-                        color="#e63946"
-                        textColor="white"
-                      />
-                    </div>
-                  </FormSection>
-                )}
-              </div>
-            </div>
-            <div className="button-save">
-              <Button
-                text={isEditing ? "Guardar Cambios" : "Editar"}
-                onClick={() => {
-                  if (isEditing) {
-                    updateClient();
-                    updateReceiver(receptors[receiverIndexToEdit]);
-                  } else {
-                    setIsEditing(true);
-                  }
-                }}
-                size="medium"
-                color="#57cc99"
-              />
-              <Button
-                text={isEditing ? "Cancelar" : "Cerrar"}
-                onClick={() => {
-                  if (isEditing) {
-                    setIsEditing(false);
-                    setIsNewReceiver(false);
-                  } else {
-                    closeModal();
-                  }
-                }}
-                size="medium"
-                color={isEditing ? "#fbfbfb" : "#e63946"}
-                textColor={isEditing ? "black" : "white"}
-              />
-            </div>
-          </FormContainer>
-        ) : (
-          <p>Cargando datos del cliente...</p>
-        )}
-      </Modal>
+      <ModalEditClient
+        isEditModalOpen={isEditModalOpen}
+        closeModal={() => setIsEditModalOpen(false)}
+        selectedClient={selectedClient}
+        updateClient={updateClient}
+        updateReceiver={updateReceiver}
+        createReceiver={createReceiver}
+      />
     </div>
   );
 };

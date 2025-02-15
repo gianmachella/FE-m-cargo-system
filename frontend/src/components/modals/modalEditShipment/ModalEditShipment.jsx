@@ -2,10 +2,10 @@ import "./ModalEditShipment.css";
 
 import React, { useEffect, useState } from "react";
 
-import ButtonComponent from "../button/Button";
-import Input from "../inputs/InputComponent";
+import ButtonComponent from "../../button/Button";
+import Input from "../../inputs/InputComponent";
 import Modal from "react-modal";
-import { formatarFecha } from "../../utilities/utilities";
+import { formatarFecha } from "../../../utilities/utilities";
 
 Modal.setAppElement("#root");
 const ModalEditShipment = (props) => {

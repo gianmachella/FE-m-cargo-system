@@ -5,10 +5,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useGlobalFilter, usePagination, useTable } from "react-table";
 
 import Button from "../button/Button";
-import { FormContainer } from "../form/Form";
-import Input from "../inputs/InputComponent";
 import Modal from "react-modal";
-import ModalEditShipment from "../modal/ModalEditShipment";
+import ModalEditShipment from "../modals/modalEditShipment/ModalEditShipment";
 import ReactPaginate from "react-paginate";
 import Swal from "sweetalert2";
 

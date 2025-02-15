@@ -1,12 +1,12 @@
 import "./ModalConfirmation.css";
 
-import ButtonComponent from "../button/Button";
-import Input from "../inputs/InputComponent";
+import ButtonComponent from "../../button/Button";
+import Input from "../../inputs/InputComponent";
 import Modal from "react-modal";
 import React from "react";
 
 Modal.setAppElement("#root");
-const ModalComfirmation = (props) => {
+const ModalConfirmation = (props) => {
   const {
     showConfirmationModal,
     setShowConfirmationModal,
@@ -280,4 +280,4 @@ const ModalComfirmation = (props) => {
   );
 };
 
-export default ModalComfirmation;
+export default ModalConfirmation;
