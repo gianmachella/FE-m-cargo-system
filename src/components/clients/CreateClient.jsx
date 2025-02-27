@@ -4,16 +4,14 @@ import { BsFillPencilFill, BsX } from "react-icons/bs";
 import { FormContainer, FormSection } from "../form/Form";
 import React, { useEffect, useState } from "react";
 
+import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
 import { countryOptions } from "../../utilities/options";
-import { use } from "react";
 
-const CreateClient = (props) => {
-  const { clientData } = props;
-
+const CreateClient = () => {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -104,7 +102,7 @@ const CreateClient = (props) => {
             : receptor
         );
         setReceptores(updatedReceptores);
-        setEditingIndex(null); // Salir del modo edición
+        setEditingIndex(null);
       } else {
         setReceptores([
           ...receptores,
@@ -161,7 +159,7 @@ const CreateClient = (props) => {
   const handleSendEmail = async (clientData) => {
     console.log(clientData);
 
-    const response = await fetch("http://localhost:5000/api/send-email", {
+    const response = await fetch(`${API_BASE_URL}/api/send-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -184,7 +182,6 @@ const CreateClient = (props) => {
     setLoading(true);
     setSuccessMessage("");
 
-    // Obtener el token
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
 
@@ -216,7 +213,7 @@ const CreateClient = (props) => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/clients", {
+      const response = await fetch(`${API_BASE_URL}/api/clients`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

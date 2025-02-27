@@ -2,6 +2,7 @@ import "./CreateBatch.css";
 
 import React, { useState } from "react";
 
+import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
@@ -12,9 +13,9 @@ import { useNavigate } from "react-router-dom";
 const CreateBatch = () => {
   const [batchNumber, setBatchNumber] = useState("");
   const [destinationCountry, setDestinationCountry] = useState("Venezuela");
-  const [shipmentType, setShipmentType] = useState("Marítimo"); // Nuevo estado
+  const [shipmentType, setShipmentType] = useState("Marítimo");
   const [status, setStatus] = useState("En Proceso");
-  const [createdBy, setCreatedBy] = useState(1); // ID de usuario creador (ejemplo)
+  const [createdBy, setCreatedBy] = useState(1);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,7 +25,7 @@ const CreateBatch = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/api/batches", {
+      const response = await fetch(`${API_BASE_URL}/api/batches`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,7 +34,7 @@ const CreateBatch = () => {
         body: JSON.stringify({
           batchNumber,
           destinationCountry,
-          shipmentType, // Incluye el tipo de envío
+          shipmentType,
           status,
           createdBy,
           updatedBy: createdBy,
@@ -43,7 +44,7 @@ const CreateBatch = () => {
       if (!response.ok) throw new Error("Error al crear lote.");
 
       Swal.fire("Éxito", "Lote creado con éxito", "success").then(() => {
-        navigate("/lotes"); // Redirige a la lista de lotes
+        navigate("/lotes");
       });
     } catch (error) {
       Swal.fire("Error", error.message || "No se pudo crear el lote", "error");

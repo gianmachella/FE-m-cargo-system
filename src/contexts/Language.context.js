@@ -1,14 +1,10 @@
 import React, { createContext, useContext, useState } from "react";
 
-// Crear el contexto
 const LanguageContext = createContext();
 
-// Hook personalizado para usar el contexto de lenguaje
 export const useLanguage = () => useContext(LanguageContext);
-
-// Proveedor del contexto para envolver la aplicación
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState("en"); // Cambiar el idioma según lo que prefieras
+  const [language, setLanguage] = useState("en");
   const key = {
     admin_sidemenu_item_lots: "Lotes",
     admin_sidemenu_item_create_lot: "Crear Lote",

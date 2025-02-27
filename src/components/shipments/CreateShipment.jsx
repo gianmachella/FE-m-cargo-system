@@ -3,6 +3,7 @@ import "./ShippingWizard.css";
 import { BsBox2, BsBoxes } from "react-icons/bs";
 import React, { useEffect, useState } from "react";
 
+import API_BASE_URL from "../../config/config";
 import { FaUser } from "react-icons/fa";
 import Modal from "react-modal";
 import ModalConfirmation from "../modals/ModalConfirmation/ModalConfirmation";
@@ -36,7 +37,7 @@ const ShippingWizard = () => {
   };
 
   const handleSendEmail = async (shipmentData, clientData, receiverData) => {
-    const response = await fetch("http://localhost:5000/api/send-email", {
+    const response = await fetch(`${API_BASE_URL}/api/send-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -80,11 +81,7 @@ const ShippingWizard = () => {
         boxes: JSON.stringify(dataSteepThree.boxes),
       };
 
-      console.log(dataSteepOne);
-      console.log(dataSteepTwo);
-      console.log(dataSteepThree);
-
-      const response = await fetch("http://localhost:5000/api/shipments", {
+      const response = await fetch(`${API_BASE_URL}/api/shipments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -10,6 +10,7 @@ import {
 } from "../../utilities/options";
 import { useGlobalFilter, usePagination, useTable } from "react-table";
 
+import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Modal from "react-modal";
@@ -24,7 +25,7 @@ const fetchBatches = async (page, search) => {
     localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const response = await fetch(
-    `http://localhost:5000/api/batches?page=${page}&search=${search || ""}`,
+    `${API_BASE_URL}/api/batches?page=${page}&search=${search || ""}`,
     {
       method: "GET",
       headers: {
@@ -37,7 +38,6 @@ const fetchBatches = async (page, search) => {
   if (!response.ok) throw new Error("Failed to fetch batches.");
 
   const result = await response.json();
-  console.log("Fetched batches:", result);
 
   return result;
 };
@@ -56,7 +56,6 @@ const ListBatches = () => {
     setLoading(true);
     try {
       const response = await fetchBatches(page + 1, search);
-      console.log("API Response:", response);
 
       const { data, totalPages } = response;
 
@@ -115,23 +114,20 @@ const ListBatches = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await fetch(
-        `http://localhost:5000/api/batches/${batch.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(batch),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/batches/${batch.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(batch),
+      });
 
       if (!response.ok) throw new Error("Error al actualizar el lote.");
 
       Swal.fire("Éxito", "Lote actualizado con éxito", "success");
-      setIsEditModalOpen(false); // Cierra la modal después de la actualización
-      loadBatches(); // Recarga la lista de lotes
+      setIsEditModalOpen(false);
+      loadBatches();
     } catch (error) {
       Swal.fire(
         "Error",
@@ -142,7 +138,7 @@ const ListBatches = () => {
   };
 
   const tableInstance = useTable(
-    { columns, data: batches }, // batches debería ser un array aquí
+    { columns, data: batches },
     useGlobalFilter,
     usePagination
   );
@@ -154,29 +150,17 @@ const ListBatches = () => {
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
-    setPage(0); // Reinicia a la primera página
+    setPage(0);
   };
 
   const handleEdit = (batch) => {
-    console.log("Abriendo modal para el batch:", batch);
     setSelectedBatch(batch);
     setIsEditModalOpen(true);
-    console.log("isEditModalOpen después de set:", isEditModalOpen); // <-- Esto debería mostrar true
   };
 
   const closeModal = () => {
     setSelectedBatch(null);
-    setIsEditModalOpen(false); // Cambia a 'false' para cerrar la modal.
-  };
-
-  const filterBatches = (batches, search) => {
-    const lowerSearch = search.toLowerCase();
-    return batches.filter(
-      (batch) =>
-        batch.batchNumber.toLowerCase().includes(lowerSearch) ||
-        batch.destinationCountry.toLowerCase().includes(lowerSearch) ||
-        batch.shipmentType?.toLowerCase().includes(lowerSearch)
-    );
+    setIsEditModalOpen(false);
   };
 
   const handleDelete = async (batchId) => {
@@ -192,13 +176,10 @@ const ListBatches = () => {
       try {
         const token =
           localStorage.getItem("token") || sessionStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:5000/api/batches/${batchId}`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/api/batches/${batchId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         if (!response.ok) throw new Error("Error al eliminar el lote.");
         await loadBatches();
@@ -219,7 +200,7 @@ const ListBatches = () => {
           placeholder="Buscar por número de lote o destino..."
           value={search}
           onChange={handleSearch}
-          style={{ width: "300px" }} // Ajuste del ancho del input
+          style={{ width: "300px" }}
         />
       </div>
 
@@ -231,12 +212,15 @@ const ListBatches = () => {
         <table {...getTableProps()} className="batches-table">
           <thead>
             {headerGroups.map((headerGroup, index) => (
-              <tr key={index} {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column, colIndex) => (
-                  <th key={colIndex} {...column.getHeaderProps()}>
-                    {column.render("Header")}
-                  </th>
-                ))}
+              <tr key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column) => {
+                  const { key, ...columnProps } = column.getHeaderProps();
+                  return (
+                    <th key={key} {...columnProps}>
+                      {column.render("Header")}
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>
@@ -246,14 +230,19 @@ const ListBatches = () => {
                 <td colSpan="6">No se encontraron lotes.</td>
               </tr>
             )}
-            {rows.map((row, rowIndex) => {
+            {rows.map((row) => {
               prepareRow(row);
-              console.log("Rendering row:", row.original); // Verifica si llega el lote aquí
+              const { key, ...rowProps } = row.getRowProps();
               return (
-                <tr key={rowIndex} {...row.getRowProps()}>
-                  {row.cells.map((cell) => (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-                  ))}
+                <tr key={key} {...rowProps}>
+                  {row.cells.map((cell) => {
+                    const { key, ...cellProps } = cell.getCellProps();
+                    return (
+                      <td key={key} {...cellProps}>
+                        {cell.render("Cell")}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}
@@ -320,7 +309,6 @@ const ListBatches = () => {
               options={statusOptions}
             />
 
-            {/* Select para el tipo de envío */}
             <Select
               label="Tipo de Envío"
               value={selectedBatch.shipmentType}

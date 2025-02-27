@@ -1,6 +1,7 @@
 import { FormContainer, FormSection } from "../../form/Form";
 import React, { useEffect, useState } from "react";
 
+import API_BASE_URL from "../../../config/config";
 import Accordion from "../../acordion/Acordion";
 import ButtonComponent from "../../button/Button";
 import Input from "../../inputs/InputComponent";
@@ -14,11 +15,10 @@ export const Steep1 = (props) => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [receivers, setReceivers] = useState([]);
   const [selectedReceiver, setSelectedReceiver] = useState(null);
-
   const loadClients = async (searchTerm) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/clients?search=${searchTerm || ""}`
+        `${API_BASE_URL}/api/clients?search=${searchTerm || ""}`
       );
       const result = await response.json();
       setClients(result.data || []);
@@ -31,7 +31,7 @@ export const Steep1 = (props) => {
   const loadReceivers = async (clientId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/clients/${clientId}/receivers`
+        `${API_BASE_URL}/api/clients/${clientId}/receivers`
       );
       const result = await response.json();
 
@@ -45,7 +45,7 @@ export const Steep1 = (props) => {
 
   const handleClientSelect = (client) => {
     setSelectedClient(client);
-    loadReceivers(client.id); // Cargar los receptores del cliente seleccionado
+    loadReceivers(client.id);
   };
 
   const handleReceiverSelect = (receiverId) => {
@@ -55,7 +55,7 @@ export const Steep1 = (props) => {
 
   useEffect(() => {
     if (search.length > 2) {
-      loadClients(search); // Buscar si hay más de 2 caracteres
+      loadClients(search);
     }
   }, [search]);
 

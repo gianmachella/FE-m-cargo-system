@@ -4,6 +4,7 @@ import { FaPen, FaTrashCan } from "react-icons/fa6";
 import React, { useEffect, useMemo, useState } from "react";
 import { useGlobalFilter, usePagination, useTable } from "react-table";
 
+import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
 import Modal from "react-modal";
 import ModalEditClient from "../modals/modalEditClient/ModalEditClient";
@@ -17,7 +18,7 @@ const fetchClients = async (page, search) => {
     localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const response = await fetch(
-    `http://localhost:5000/api/clients?page=${page}&search=${search || ""}`,
+    `${API_BASE_URL}/api/clients?page=${page}&search=${search || ""}`,
     {
       method: "GET",
       headers: {
@@ -44,8 +45,6 @@ const ListClients = () => {
   const [receptors, setReceptors] = useState([]);
 
   const [isEditingReceiver, setIsEditingReceiver] = useState(false);
-  const [isNewReceiver, setIsNewReceiver] = useState(false);
-  const [receiverIndexToEdit, setReceiverIndexToEdit] = useState(null);
 
   const fetchReceiversByClientId = async (clientId) => {
     try {
@@ -53,7 +52,7 @@ const ListClients = () => {
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/clients/${clientId}/receivers`,
+        `${API_BASE_URL}/api/clients/${clientId}/receivers`,
         {
           method: "GET",
           headers: {
@@ -68,7 +67,6 @@ const ListClients = () => {
       }
 
       const data = await response.json();
-      console.log("Receptores del cliente:", data);
       return data;
     } catch (error) {
       console.error("Error al cargar los receptores:", error);
@@ -79,9 +77,9 @@ const ListClients = () => {
 
   const handleEdit = async (client) => {
     try {
-      const receivers = await fetchReceiversByClientId(client.id); // Carga receptores desde la API
-      setSelectedClient({ ...client, receivers }); // Guarda el cliente con sus receptores
-      setIsEditModalOpen(true); // Abre la modal
+      const receivers = await fetchReceiversByClientId(client.id);
+      setSelectedClient({ ...client, receivers });
+      setIsEditModalOpen(true);
     } catch (error) {
       console.error("Error al cargar receptores:", error);
       Swal.fire("Error", "No se pudieron cargar los receptores.", "error");
@@ -102,7 +100,7 @@ const ListClients = () => {
         const token =
           localStorage.getItem("token") || sessionStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:5000/api/clients/${clientId}`,
+          `${API_BASE_URL}/api/clients/${clientId}`,
           {
             method: "DELETE",
             headers: {
@@ -134,7 +132,7 @@ const ListClients = () => {
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
       const clientResponse = await fetch(
-        `http://localhost:5000/api/clients/${selectedClient.id}`,
+        `${API_BASE_URL}/api/clients/${selectedClient.id}`,
         {
           method: "PUT",
           headers: {
@@ -163,7 +161,6 @@ const ListClients = () => {
       const newReceivers = receivers.filter((receiver) => !receiver.id);
 
       for (const newReceiver of newReceivers) {
-        console.log("Creando receptor:", newReceiver);
         await createReceiver({ ...newReceiver, clientId: selectedClient.id });
       }
 
@@ -188,7 +185,7 @@ const ListClients = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/api/receivers", {
+      const response = await fetch(`${API_BASE_URL}/api/receivers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -221,7 +218,7 @@ const ListClients = () => {
       console.log(receiver);
 
       const response = await fetch(
-        `http://localhost:5000/api/receivers/${receiver.id}`,
+        `${API_BASE_URL}/api/receivers/${receiver.id}`,
         {
           method: "PUT",
           headers: {
@@ -333,7 +330,7 @@ const ListClients = () => {
           placeholder="Busca por nombre, telefono o email..."
           value={search}
           onChange={handleSearch}
-          style={{ width: "300px" }} // Ajuste del ancho del input
+          style={{ width: "300px" }}
         />
       </div>
 

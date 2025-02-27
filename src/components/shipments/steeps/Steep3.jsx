@@ -19,7 +19,6 @@ const Steep3 = (props) => {
 
   const [shipmentNumber, setShipmentNumber] = useState("");
   const [totalWeight, setTotalWeight] = useState(0);
-  const [totalVolume, setTotalVolume] = useState(0);
   const [totalBoxes, setTotalBoxes] = useState(0);
   const [boxes, setBoxes] = useState([]);
   const [newBox, setNewBox] = useState({ weight: "", size: "" });
@@ -83,15 +82,15 @@ const Steep3 = (props) => {
 
   const calculateTotalVolume = () => {
     if (!Array.isArray(boxes) || boxes.length === 0) {
-      return "0.00"; // Si no hay cajas, devuelve 0
+      return "0.00";
     }
 
     const totalVolume = boxes.reduce((acc, box) => {
-      const volume = parseFloat(box.volume); // Usa directamente el volumen ya asignado
+      const volume = parseFloat(box.volume);
 
       if (isNaN(volume)) {
         console.warn("Error: Volumen inválido en la caja:", box);
-        return acc; // Ignorar valores inválidos
+        return acc;
       }
 
       return acc + volume;

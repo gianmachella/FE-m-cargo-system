@@ -4,6 +4,7 @@ import { FaPen, FaTrashCan } from "react-icons/fa6";
 import React, { useEffect, useMemo, useState } from "react";
 import { useGlobalFilter, usePagination, useTable } from "react-table";
 
+import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
 import Modal from "react-modal";
 import ModalEditShipment from "../modals/modalEditShipment/ModalEditShipment";
@@ -18,19 +19,16 @@ const fetchShipments = async (page, search = "") => {
 
   const queryParams = new URLSearchParams({
     page: page,
-    search: encodeURIComponent(search.trim()), // Evita caracteres especiales en la URL
+    search: encodeURIComponent(search.trim()),
   }).toString();
 
-  const response = await fetch(
-    `http://localhost:5000/api/shipments?${queryParams}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const response = await fetch(`${API_BASE_URL}/api/shipments?${queryParams}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!response.ok) {
     throw new Error(`Error al obtener los envíos: ${response.statusText}`);
@@ -125,7 +123,7 @@ const ListShipments = () => {
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/shipments/${shipment.id}`,
+        `${API_BASE_URL}/api/shipments/${shipment.id}`,
         {
           method: "PUT",
           headers: {
@@ -166,7 +164,7 @@ const ListShipments = () => {
           localStorage.getItem("token") || sessionStorage.getItem("token");
 
         const response = await fetch(
-          `http://localhost:5000/api/shipments/${shipmentId}`,
+          `${API_BASE_URL}/api/shipments/${shipmentId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },

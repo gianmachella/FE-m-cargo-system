@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import API_BASE_URL from "../../../config/config";
 import ButtonComponent from "../../button/Button";
 import { FormContainer } from "../../form/Form";
 import Select from "../../select/SelectComponent";
@@ -13,7 +14,7 @@ const Steep2 = (props) => {
 
   const loadBatches = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/batches`);
+      const response = await fetch(`${API_BASE_URL}/api/batches`);
       const result = await response.json();
       setBatches(result.data || []);
     } catch (error) {

@@ -1,8 +1,5 @@
-import "./Dashboard.css"; // Asegúrate de tener los estilos de Dashboard aplicados
+import "./Dashboard.css";
 
-import { FormContainer, FormSection } from "../components/form/Form";
-
-import Input from "../components/inputs/InputComponent";
 import React from "react";
 import logo from "../images/logos/logo-hor.png";
 

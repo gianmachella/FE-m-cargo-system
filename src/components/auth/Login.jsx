@@ -3,6 +3,7 @@ import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import React, { useContext, useEffect, useState } from "react";
 
+import API_BASE_URL from "../../config/config";
 import { AuthContext } from "../../contexts/AuthContext";
 import ButtonComponent from "../button/Button";
 import Input from "../inputs/InputComponent";
@@ -39,7 +40,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, company, rememberMe }),

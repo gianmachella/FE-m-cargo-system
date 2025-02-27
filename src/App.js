@@ -1,4 +1,3 @@
-// src/App.js
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 import { AuthProvider } from "./contexts/AuthContext";
@@ -19,7 +18,6 @@ function App() {
   return (
     <LanguageProvider>
       <Router>
-        {/* AuthProvider ahora está dentro de Router */}
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />

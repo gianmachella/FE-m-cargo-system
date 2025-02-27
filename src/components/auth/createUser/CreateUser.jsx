@@ -1,6 +1,7 @@
 import { FormContainer, FormSection } from "../../form/Form";
 import React, { useState } from "react";
 
+import API_BASE_URL from "../../../config/config";
 import Button from "../../button/Button";
 import Input from "../../inputs/InputComponent";
 import Select from "../../select/SelectComponent";
@@ -18,8 +19,6 @@ const CreateUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("🚀 handleSubmit se ejecutó");
 
     if (
       !firstName ||
@@ -44,12 +43,10 @@ const CreateUser = () => {
       updatedBy: 1,
     };
 
-    console.log("📤 Enviando datos:", userData);
-
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
