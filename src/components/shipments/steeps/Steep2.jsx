@@ -5,6 +5,7 @@ import ButtonComponent from "../../button/Button";
 import { FormContainer } from "../../form/Form";
 import Select from "../../select/SelectComponent";
 import Swal from "sweetalert2";
+import { formatarFecha } from "../../../utilities/utilities";
 
 const Steep2 = (props) => {
   const { setDataSteepTwo, handleNextStep, handlePreviousStep } = props;
@@ -25,6 +26,7 @@ const Steep2 = (props) => {
 
   useEffect(() => {
     loadBatches();
+    console.log(selectedBatch);
   }, []);
 
   return (
@@ -33,6 +35,7 @@ const Steep2 = (props) => {
       <Select
         label="Lote"
         width="300px"
+        value={selectedBatch?.id}
         options={batches.map((batch) => ({
           value: batch.id,
           label: batch.batchNumber,
@@ -48,6 +51,8 @@ const Steep2 = (props) => {
         <div className="batch-card">
           <p>Número de Lote: {selectedBatch.batchNumber}</p>
           <p>Destino: {selectedBatch.destinationCountry}</p>
+          <p>Creado: {formatarFecha(selectedBatch.createdAt)}</p>
+          <p>Tipo de Envío: {selectedBatch.shipmentType}</p>
         </div>
       )}
       <div className="buttons-wizard">

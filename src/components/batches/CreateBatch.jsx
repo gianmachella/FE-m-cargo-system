@@ -16,6 +16,7 @@ const CreateBatch = () => {
   const [shipmentType, setShipmentType] = useState("Marítimo");
   const [status, setStatus] = useState("Recibido en Almacen");
   const [createdBy, setCreatedBy] = useState(1);
+  const [shipmentDate, setShipmentDate] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -36,6 +37,7 @@ const CreateBatch = () => {
           destinationCountry,
           shipmentType,
           status,
+          shipmentDate,
           createdBy,
           updatedBy: createdBy,
         }),
@@ -90,6 +92,15 @@ const CreateBatch = () => {
           />
         </div>
 
+        <div className="form-group">
+          <Input
+            label="Estatus"
+            inputType="date"
+            value={shipmentDate}
+            inputText={shipmentDate}
+            onChange={(e) => setShipmentDate(e.target.value)}
+          />
+        </div>
         <div className="form-group">
           <Input label="Estatus" value={status} inputText={status} disabled />
         </div>

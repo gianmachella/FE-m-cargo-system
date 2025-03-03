@@ -14,16 +14,20 @@ import Select from "../../select/SelectComponent";
 import Swal from "sweetalert2";
 
 const Steep3 = (props) => {
-  const { setDataSteepThree, handlePreviousStep, setShowConfirmationModal } =
-    props;
+  const {
+    setDataSteepThree,
+    handlePreviousStep,
+    setShowConfirmationModal,
+    batchData,
+  } = props;
 
   const [shipmentNumber, setShipmentNumber] = useState("");
   const [totalWeight, setTotalWeight] = useState(0);
   const [totalBoxes, setTotalBoxes] = useState(0);
   const [boxes, setBoxes] = useState([]);
   const [newBox, setNewBox] = useState({ weight: "", size: "" });
-  const [shipmentType, setShipmentType] = useState("");
-  const [isWithEnsurance, setIsWithEnsurance] = useState(false);
+  const [isWithEnsurance, setIsWithEnsurance] = useState("no");
+  const [ensuranceValue, setEnsuranceValue] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [declaredValue, setDeclaredValue] = useState(null);
   const [valuePaid, setValuePaid] = useState(null);
@@ -46,9 +50,9 @@ const Steep3 = (props) => {
     }
 
     const volumeKey =
-      shipmentType === "Marítimo"
+      batchData?.shipmentType === "Marítimo"
         ? "volumeM"
-        : shipmentType === "Aéreo"
+        : batchData?.shipmentType === "Aéreo"
         ? "volumeA"
         : null;
 
@@ -108,15 +112,16 @@ const Steep3 = (props) => {
       totalBoxes,
       boxes,
       isWithEnsurance,
+      ensuranceValue,
       paymentMethod,
       declaredValue,
       valuePaid,
       customSize,
-      shipmentType: shipmentType,
+      shipmentType: batchData?.shipmentType,
     });
   };
 
-  useEffect(() => {}, [shipmentType]);
+  useEffect(() => {}, []);
 
   return (
     <FormContainer>
@@ -128,11 +133,11 @@ const Steep3 = (props) => {
           value={shipmentNumber}
           onChange={(e) => setShipmentNumber(e.target.value)}
         />
-        <Select
+        <Input
           label="Tipo de Envío"
-          value={shipmentType}
-          options={shipmentTypeOptions}
-          onChange={(e) => setShipmentType(e.target.value)}
+          value={batchData?.shipmentType}
+          inputText={batchData?.shipmentType}
+          disabled
         />
       </div>
       <div className="form-par">
@@ -146,6 +151,14 @@ const Steep3 = (props) => {
           ]}
           onChange={(value) => setIsWithEnsurance(value)}
         />
+        {isWithEnsurance === "si" && (
+          <Input
+            label="Monto del seguro"
+            placeholder="Monto del seguro"
+            value={ensuranceValue}
+            onChange={(e) => setEnsuranceValue(e.target.value)}
+          />
+        )}
 
         <RadioCheck
           label="Tipo de Pago"
@@ -193,14 +206,18 @@ const Steep3 = (props) => {
         color="#0a91af"
         onClick={handleBoxAdd}
         disabled={
-          newBox?.weight === "" || newBox?.size === "" || shipmentType === ""
+          newBox?.weight === "" ||
+          newBox?.size === "" ||
+          batchData?.shipmentType === ""
         }
       />
       <ul className="boxes-list">
         {boxes.map((box, index) => (
           <li key={index}>
             <div className="box-item">
-              Peso: {box?.weight} lbs, Tamaño: {box.size}
+              Tamaño: {box.size} - Peso: {box?.weight} lbs. - Volumen:{" "}
+              {box?.volume}{" "}
+              {batchData?.shipmentType === "Aéreo" ? "ft³" : "ft²"}
               <ButtonComponent
                 color="#e63946"
                 shape="circular"
@@ -218,7 +235,7 @@ const Steep3 = (props) => {
       <p>Peso Total: {totalWeight.toFixed(2)} lbs</p>
       <p>
         Volumen Total: {calculateTotalVolume()}{" "}
-        {shipmentType === "Marítimo" ? "ft³" : "ft²"}
+        {batchData?.shipmentType === "Aéreo" ? "ft³" : "ft²"}
       </p>
 
       <div className="buttons-wizard">

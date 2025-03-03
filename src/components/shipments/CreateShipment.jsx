@@ -203,6 +203,7 @@ const ShippingWizard = () => {
           handlePreviousStep={handlePreviousStep}
           setDataSteepThree={setDataSteepThree}
           setShowConfirmationModal={setShowConfirmationModal}
+          batchData={dataSteepTwo}
         />
       )}
       <ModalConfirmation

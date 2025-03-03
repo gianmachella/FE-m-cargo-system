@@ -10,6 +10,7 @@ import Modal from "react-modal";
 import ModalEditClient from "../modals/modalEditClient/ModalEditClient";
 import ReactPaginate from "react-paginate";
 import Swal from "sweetalert2";
+import ToolTips from "../tooltips/Tooltips";
 
 Modal.setAppElement("#root");
 
@@ -281,22 +282,26 @@ const ListClients = () => {
         accessor: "actions",
         Cell: ({ row }) => (
           <div className="action-buttons">
-            <Button
-              shape="circular"
-              size="extrasmall"
-              icon={<FaPen />}
-              iconPosition="center"
-              color="#4cc9f0"
-              onClick={() => handleEdit(row.original)}
-            />
-            <Button
-              shape="circular"
-              size="extrasmall"
-              icon={<FaTrashCan />}
-              iconPosition="center"
-              color="#ef233c"
-              onClick={() => handleDelete(row.original.id)}
-            />
+            <ToolTips text="Editar" position="top">
+              <Button
+                shape="circular"
+                size="extrasmall"
+                icon={<FaPen />}
+                iconPosition="center"
+                color="#4cc9f0"
+                onClick={() => handleEdit(row.original)}
+              />
+            </ToolTips>
+            <ToolTips text="Borrar" position="top">
+              <Button
+                shape="circular"
+                size="extrasmall"
+                icon={<FaTrashCan />}
+                iconPosition="center"
+                color="#ef233c"
+                onClick={() => handleDelete(row.original.id)}
+              />
+            </ToolTips>
           </div>
         ),
       },

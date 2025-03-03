@@ -9,6 +9,7 @@ import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
+import Tooltips from "../tooltips/Tooltips";
 import { countryOptions } from "../../utilities/options";
 
 const CreateClient = () => {
@@ -402,22 +403,26 @@ const CreateClient = () => {
                   <div className="receptor-item">
                     {receptor.nombre} {receptor.apellido} - {receptor.telefono}
                     <div className="buttons-receptorlist-container">
-                      <Button
-                        icon={<BsFillPencilFill />}
-                        onClick={() => editReceptor(index)}
-                        shape="circular"
-                        size="extrasmall"
-                        iconPosition="center"
-                        color="#00b4d8"
-                      />
-                      <Button
-                        icon={<BsX />}
-                        onClick={() => deleteReceptor(index)}
-                        shape="circular"
-                        size="extrasmall"
-                        iconPosition="center"
-                        color="#e63946"
-                      />
+                      <Tooltips text="Editar" position="top">
+                        <Button
+                          icon={<BsFillPencilFill />}
+                          onClick={() => editReceptor(index)}
+                          shape="circular"
+                          size="extrasmall"
+                          iconPosition="center"
+                          color="#00b4d8"
+                        />
+                      </Tooltips>
+                      <Tooltips text="Borrar" position="top">
+                        <Button
+                          icon={<BsX />}
+                          onClick={() => deleteReceptor(index)}
+                          shape="circular"
+                          size="extrasmall"
+                          iconPosition="center"
+                          color="#e63946"
+                        />
+                      </Tooltips>
                     </div>
                   </div>
                 </li>

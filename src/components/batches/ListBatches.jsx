@@ -17,6 +17,7 @@ import Modal from "react-modal";
 import ReactPaginate from "react-paginate";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
+import Tooltips from "../tooltips/Tooltips";
 
 Modal.setAppElement("#root");
 
@@ -86,22 +87,26 @@ const ListBatches = () => {
         accessor: "actions",
         Cell: ({ row }) => (
           <div className="action-buttons">
-            <Button
-              shape="circular"
-              size="extrasmall"
-              icon={<FaPen />}
-              iconPosition="center"
-              onClick={() => handleEdit(row.original)}
-              color="#4cc9f0"
-            />
-            <Button
-              shape="circular"
-              size="extrasmall"
-              icon={<FaTrashCan />}
-              iconPosition="center"
-              onClick={() => handleDelete(row.original.id)}
-              color="#ef233c"
-            />
+            <Tooltips text="Editar" position="top">
+              <Button
+                shape="circular"
+                size="extrasmall"
+                icon={<FaPen />}
+                iconPosition="center"
+                onClick={() => handleEdit(row.original)}
+                color="#4cc9f0"
+              />
+            </Tooltips>
+            <Tooltips text="Borrar" position="top">
+              <Button
+                shape="circular"
+                size="extrasmall"
+                icon={<FaTrashCan />}
+                iconPosition="center"
+                onClick={() => handleDelete(row.original.id)}
+                color="#ef233c"
+              />
+            </Tooltips>
           </div>
         ),
       },
