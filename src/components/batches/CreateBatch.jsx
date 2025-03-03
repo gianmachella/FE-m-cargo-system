@@ -1,20 +1,20 @@
 import "./CreateBatch.css";
 
 import React, { useState } from "react";
+import { countryOptions, statusOptions } from "../../utilities/options";
 
 import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
-import { statusOptions } from "../../utilities/options";
 import { useNavigate } from "react-router-dom";
 
 const CreateBatch = () => {
   const [batchNumber, setBatchNumber] = useState("");
   const [destinationCountry, setDestinationCountry] = useState("Venezuela");
   const [shipmentType, setShipmentType] = useState("Marítimo");
-  const [status, setStatus] = useState("En Proceso");
+  const [status, setStatus] = useState("Recibido en Almacen");
   const [createdBy, setCreatedBy] = useState(1);
   const navigate = useNavigate();
 
@@ -72,11 +72,7 @@ const CreateBatch = () => {
             value={destinationCountry}
             inputText={destinationCountry}
             onChange={(e) => setDestinationCountry(e.target.value)}
-            options={[
-              { label: "Venezuela", value: "Venezuela" },
-              { label: "Colombia", value: "Colombia" },
-              { label: "Ecuador", value: "Ecuador" },
-            ]}
+            options={countryOptions}
           />
         </div>
 
@@ -95,13 +91,7 @@ const CreateBatch = () => {
         </div>
 
         <div className="form-group">
-          <Select
-            label="Estado"
-            value={status}
-            inputText={status}
-            onChange={(e) => setStatus(e.target.value)}
-            options={statusOptions}
-          />
+          <Input label="Estatus" value={status} inputText={status} disabled />
         </div>
 
         <div className="form-actions">

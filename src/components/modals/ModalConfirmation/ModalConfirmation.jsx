@@ -35,7 +35,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Nombre completo"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepOne.clientData?.firstName || ""} ${
                     dataSteepOne.clientData?.lastName || ""
                   }`}
@@ -46,7 +46,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Telefono"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepOne.clientData?.phone}`}
                   disabled
                 />
@@ -55,7 +55,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Email "
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepOne.clientData?.email}`}
                   disabled
                 />
@@ -67,7 +67,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Nombre completo"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepOne.receiverData?.firstName || ""} ${
                     dataSteepOne.clientData?.lastName || ""
                   }`}
@@ -78,7 +78,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Telefono"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepOne.receiverData?.phone}`}
                   disabled
                 />
@@ -88,7 +88,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Direccion"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepOne.receiverData?.address} ${
                     dataSteepOne.receiverData?.city
                       ? dataSteepOne.receiverData?.city
@@ -109,7 +109,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Pais"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${
                     dataSteepOne.receiverData?.country
                       ? dataSteepOne.receiverData?.country
@@ -125,7 +125,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Lote"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepTwo?.batchNumber}`}
                   disabled
                 />
@@ -135,7 +135,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Numero de Envio"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepThree?.shipmentNumber}`}
                   disabled
                 />
@@ -144,7 +144,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Tipo de Envio"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepThree?.shipmentType}`}
                   disabled
                 />
@@ -156,7 +156,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Total de cajas"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepThree?.totalBoxes}`}
                   disabled
                 />
@@ -166,7 +166,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Total de peso"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepThree?.totalWeight || ""} lbs`}
                   disabled
                 />
@@ -176,7 +176,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Total volumen"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepThree?.totalVolume || ""} ${
                     dataSteepThree?.shipmentType === "Marítimo" ? "ft³" : "ft²"
                   }`}
@@ -188,7 +188,7 @@ const ModalConfirmation = (props) => {
                 <Input
                   label="Metodo de pago"
                   height="35px"
-                  borderRadius="5"
+                  borderRadius={5}
                   inputText={`${dataSteepThree?.paymentMethod}`}
                   disabled
                 />
@@ -241,7 +241,7 @@ const ModalConfirmation = (props) => {
                     <Input
                       label="Valor declarado"
                       height="35px"
-                      borderRadius="5"
+                      borderRadius={5}
                       inputText={`$${dataSteepThree?.declaredValue}`}
                       disabled
                     />
@@ -251,7 +251,7 @@ const ModalConfirmation = (props) => {
                     <Input
                       label="Valor pagado"
                       height="35px"
-                      borderRadius="5"
+                      borderRadius={5}
                       inputText={`$${dataSteepThree?.valuePaid}`}
                       disabled
                     />

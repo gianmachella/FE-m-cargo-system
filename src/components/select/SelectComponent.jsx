@@ -44,10 +44,10 @@ Select.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string,
-      value: PropTypes.string,
+      value: PropTypes.any,
     })
   ),
-  value: PropTypes.string,
+  value: PropTypes.any,
   onChange: PropTypes.func,
   name: PropTypes.string,
   disabled: PropTypes.bool,

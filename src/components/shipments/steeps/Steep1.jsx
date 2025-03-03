@@ -1,9 +1,10 @@
 import { FormContainer, FormSection } from "../../form/Form";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import API_BASE_URL from "../../../config/config";
 import Accordion from "../../acordion/Acordion";
 import ButtonComponent from "../../button/Button";
+import { FaLastfmSquare } from "react-icons/fa";
 import Input from "../../inputs/InputComponent";
 import Select from "../../select/SelectComponent";
 import Swal from "sweetalert2";
@@ -12,9 +13,13 @@ export const Steep1 = (props) => {
   const { setDataSteepOne, handleNextStep } = props;
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedClient, setSelectedClient] = useState([]);
   const [receivers, setReceivers] = useState([]);
-  const [selectedReceiver, setSelectedReceiver] = useState(null);
+  const [selectedReceiver, setSelectedReceiver] = useState([]);
+  const [openAccordionClient, setOpenAccordionClient] = useState(false);
+  const [openAccordionCustomer, setOpenAccordionCustomer] = useState(false);
+  const [openAccordionReceiver, setOpenAccordionReceiver] = useState(false);
+
   const loadClients = async (searchTerm) => {
     try {
       const response = await fetch(
@@ -22,6 +27,7 @@ export const Steep1 = (props) => {
       );
       const result = await response.json();
       setClients(result.data || []);
+      setOpenAccordionClient(result?.data.length > 0 ? true : false);
     } catch (error) {
       console.error("Error loading clients:", error);
       Swal.fire("Error", "No se pudieron cargar los clientes.", "error");
@@ -44,13 +50,13 @@ export const Steep1 = (props) => {
   };
 
   const handleClientSelect = (client) => {
-    setSelectedClient(client);
+    setSelectedClient([client]);
     loadReceivers(client.id);
   };
 
   const handleReceiverSelect = (receiverId) => {
     const receiver = receivers.find((r) => r.id === parseInt(receiverId));
-    setSelectedReceiver(receiver);
+    setSelectedReceiver([receiver]);
   };
 
   useEffect(() => {
@@ -58,6 +64,11 @@ export const Steep1 = (props) => {
       loadClients(search);
     }
   }, [search]);
+
+  useMemo(() => {
+    setOpenAccordionCustomer(selectedClient?.length ? true : false);
+    setOpenAccordionReceiver(selectedReceiver?.length ? true : false);
+  }, [selectedClient, selectedReceiver]);
 
   return (
     <FormContainer>
@@ -67,7 +78,11 @@ export const Steep1 = (props) => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <Accordion title="Lista de Usuarios encontrados...">
+      <Accordion
+        title="Lista de Usuarios encontrados..."
+        isOpen={openAccordionClient}
+        onToggle={setOpenAccordionClient}
+      >
         <div className="clients-list mb-3">
           {clients && clients.length > 0 ? (
             clients.map((client) => (
@@ -87,44 +102,48 @@ export const Steep1 = (props) => {
           )}
         </div>
       </Accordion>
-      <Accordion title="Datos del Cliente">
-        {selectedClient && (
-          <FormSection title="Datos del Cliente">
+      <Accordion
+        title="Datos del Cliente"
+        isOpen={openAccordionCustomer}
+        onToggle={setOpenAccordionCustomer}
+      >
+        {selectedClient.length && (
+          <FormSection>
             <div className="form-par">
               <Input
                 label="Nombre"
-                value={selectedClient.firstName}
-                inputText={selectedClient.firstName}
+                value={selectedClient[0]?.firstName}
+                inputText={selectedClient[0]?.firstName}
                 disabled
               />
               <Input
                 label="Apellido"
-                value={selectedClient.lastName}
-                inputText={selectedClient.lastName}
+                value={selectedClient[0]?.lastName}
+                inputText={selectedClient[0]?.lastName}
                 disabled
               />
             </div>
             <div className="form-par">
               <Input
                 label="Teléfono"
-                value={selectedClient.phone}
-                inputText={selectedClient.phone}
+                value={selectedClient[0]?.phone}
+                inputText={selectedClient[0]?.phone}
                 disabled
               />
               <Input
                 label="Email"
-                value={selectedClient.email}
-                inputText={selectedClient.email}
+                value={selectedClient[0]?.email}
+                inputText={selectedClient[0]?.email}
                 disabled
               />
             </div>
             <Select
               label="Seleccionar Receptor"
-              value={selectedReceiver?.id}
+              value={selectedReceiver[0]?.id}
               width="300px"
               options={(Array.isArray(receivers) ? receivers : []).map(
                 (receiver) => ({
-                  value: receiver.id,
+                  value: `${receiver.id}`,
                   label: `${receiver.firstName} ${receiver.lastName}`,
                 })
               )}
@@ -133,41 +152,45 @@ export const Steep1 = (props) => {
           </FormSection>
         )}
       </Accordion>
-      <Accordion title="Datos de Receptor">
+      <Accordion
+        title="Datos de Receptor"
+        isOpen={openAccordionReceiver}
+        onToggle={setOpenAccordionReceiver}
+      >
         {selectedReceiver && (
-          <FormSection title="Datos del Receptor">
+          <FormSection>
             <div className="form-par">
               <Input
                 label="Nombre"
-                value={selectedReceiver.firstName}
-                inputText={selectedReceiver.firstName}
+                value={selectedReceiver[0]?.firstName}
+                inputText={selectedReceiver[0]?.firstName}
                 disabled
               />
               <Input
                 label="Apellido"
-                value={selectedReceiver.lastName}
-                inputText={selectedReceiver.lastName}
+                value={selectedReceiver[0]?.lastName}
+                inputText={selectedReceiver[0]?.lastName}
                 disabled
               />
             </div>
             <div className="form-par">
               <Input
                 label="Teléfono"
-                value={selectedReceiver.phone}
-                inputText={selectedReceiver.phone}
+                value={selectedReceiver[0]?.phone}
+                inputText={selectedReceiver[0]?.phone}
                 disabled
               />
               <Input
                 label="País"
-                value={selectedReceiver.country}
-                inputText={selectedReceiver.country}
+                value={selectedReceiver[0]?.country}
+                inputText={selectedReceiver[0]?.country}
                 disabled
               />
             </div>
             <Input
               label="Dirección"
-              value={selectedReceiver.address}
-              inputText={selectedReceiver.address}
+              value={selectedReceiver[0]?.address}
+              inputText={selectedReceiver[0]?.address}
               disabled
             />
           </FormSection>
@@ -179,8 +202,8 @@ export const Steep1 = (props) => {
         onClick={() => {
           handleNextStep();
           setDataSteepOne({
-            clientData: selectedClient,
-            receiverData: selectedReceiver,
+            clientData: selectedClient[0],
+            receiverData: selectedReceiver[0],
           });
         }}
         disabled={!selectedClient || !selectedReceiver}
