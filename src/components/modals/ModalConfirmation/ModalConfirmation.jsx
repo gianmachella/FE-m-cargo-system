@@ -205,7 +205,7 @@ const ModalConfirmation = (props) => {
                     <Input
                       height="35px"
                       inputText={
-                        dataSteepThree?.insuranceValue === "si"
+                        dataSteepThree?.isWithEnsurance === "si"
                           ? `$${dataSteepThree.insuranceValue || 0}`
                           : "$0.00"
                       }
