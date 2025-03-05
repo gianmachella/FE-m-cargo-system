@@ -94,7 +94,7 @@ const CreateBatch = () => {
 
         <div className="form-group">
           <Input
-            label="Estatus"
+            label="Fecha de salida"
             inputType="date"
             value={shipmentDate}
             inputText={shipmentDate}

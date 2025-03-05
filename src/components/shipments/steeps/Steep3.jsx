@@ -27,7 +27,7 @@ const Steep3 = (props) => {
   const [boxes, setBoxes] = useState([]);
   const [newBox, setNewBox] = useState({ weight: "", size: "" });
   const [isWithEnsurance, setIsWithEnsurance] = useState("no");
-  const [ensuranceValue, setEnsuranceValue] = useState("");
+  const [insuranceValue, setInsuranceValue] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [declaredValue, setDeclaredValue] = useState(null);
   const [valuePaid, setValuePaid] = useState(null);
@@ -112,7 +112,7 @@ const Steep3 = (props) => {
       totalBoxes,
       boxes,
       isWithEnsurance,
-      ensuranceValue,
+      insuranceValue,
       paymentMethod,
       declaredValue,
       valuePaid,
@@ -155,8 +155,8 @@ const Steep3 = (props) => {
           <Input
             label="Monto del seguro"
             placeholder="Monto del seguro"
-            value={ensuranceValue}
-            onChange={(e) => setEnsuranceValue(e.target.value)}
+            value={insuranceValue}
+            onChange={(e) => setInsuranceValue(e.target.value)}
           />
         )}
 
