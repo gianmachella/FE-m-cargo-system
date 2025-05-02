@@ -7,7 +7,7 @@ import API_BASE_URL from "../../config/config";
 import { AuthContext } from "../../contexts/AuthContext";
 import ButtonComponent from "../button/Button";
 import Input from "../inputs/InputComponent";
-import Logo from "../../images/logos/logo.png";
+import Logo from "../../images/logosGC/logo-system.png";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
 import { companyOptions } from "../../utilities/options";
@@ -136,7 +136,11 @@ const Login = () => {
           </div>
 
           <div className="button-login-area">
-            <ButtonComponent text="Login" size="medium" color="#57cc99">
+            <ButtonComponent
+              text="Login"
+              size="medium"
+              color="var(--color-secondary)"
+            >
               {loading ? "Logging in..." : "Login"}
             </ButtonComponent>
           </div>
