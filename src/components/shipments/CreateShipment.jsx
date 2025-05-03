@@ -73,6 +73,7 @@ const ShippingWizard = () => {
         createdBy: 1,
         updatedBy: 1,
         insurance: dataSteepThree.isWithEnsurance,
+        insuranceValue: dataSteepThree.insuranceValue || "0",
         paymentMethod: dataSteepThree.paymentMethod,
         declaredValue: dataSteepThree.declaredValue,
         valuePaid: dataSteepThree.valuePaid,
