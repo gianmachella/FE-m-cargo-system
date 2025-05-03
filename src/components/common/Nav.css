@@ -1,7 +1,7 @@
 /* Estilo general del nav */
 .nav-container {
   width: 100%;
-  background-color: #1b1b29;
+  background-color: var(--color-primary);
   position: fixed;
   top: 0;
   left: 0;
@@ -22,8 +22,9 @@
 }
 
 .nav-container img {
-  margin-top: 20px;
+  margin-top: 30px !important;
   margin-right: 20px;
+  width: 150px;
 }
 
 .icon-menu-collapse {

@@ -5,7 +5,7 @@ import { BiBell, BiMenu, BiMessageDots, BiUserCircle } from "react-icons/bi";
 import Button from "../button/Button";
 import { FaLanguage } from "react-icons/fa6";
 import React from "react";
-import logo from "../../../src/images/logos/iconwhite.png";
+import logo from "../../../src/images/logosGC/2.png";
 import { useLanguage } from "../../contexts/Language.context";
 import { useNavigate } from "react-router-dom";
 
@@ -83,7 +83,7 @@ const Nav = (props) => {
           className="logout-button"
           text="LOGOUT"
           size="extrasmall"
-          color="#1b4965"
+          color="var(--color-accent)"
         />
 
         {/* Menús */}

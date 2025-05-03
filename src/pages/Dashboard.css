@@ -5,7 +5,7 @@
 
 .content {
   padding: 20px;
-  background-color: #f0f8ff; /* Fondo celeste claro */
+  background-color: #ffffff; /* Fondo celeste claro */
   width: 100%; /* El contenido ocupa el resto del ancho */
   overflow-y: auto; /* Si el contenido es grande, habilita el scroll */
   display: flex;
@@ -15,7 +15,7 @@
 }
 
 .content h1 {
-  color: #2b6cb0; /* Azul oscuro */
+  color: var(--color-primary);
 }
 
 .content p {

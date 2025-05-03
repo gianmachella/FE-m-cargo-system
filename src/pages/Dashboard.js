@@ -1,7 +1,7 @@
 import "./Dashboard.css";
 
 import React from "react";
-import logo from "../images/logos/logo-hor.png";
+import logo from "../images/logosGC/logo-animated.gif";
 
 const Dashboard = () => {
   return (
