@@ -104,7 +104,9 @@ const ShippingWizard = () => {
       );
 
       setShowConfirmationModal(false);
-      handleDownloadPDF();
+      setTimeout(() => {
+        handleDownloadPDF();
+      }, 2000);
       setTimeout(() => {
         navigate("/envios");
       }, 3000);
