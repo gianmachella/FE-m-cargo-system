@@ -65,6 +65,7 @@ const ListShipments = () => {
 
   useEffect(() => {
     loadShipments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search]);
 
   const columns = useMemo(
@@ -116,35 +117,39 @@ const ListShipments = () => {
   };
 
   const handleEdit = (shipment) => {
-    console.log(shipment);
-
     setSelectedShipment(shipment);
     setIsEditModalOpen(true);
   };
 
-  const updateShipment = async (shipment) => {
+  const updateShipment = async (payload) => {
     try {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
+      const url = `${API_BASE_URL}/api/shipments/${payload.id}`;
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/shipments/${shipment.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(shipment),
-        }
-      );
+      // Si tu API espera boxes como string, descomenta:
+      // const body = JSON.stringify({ ...payload, boxes: JSON.stringify(payload.boxes) });
+      const body = JSON.stringify(payload);
 
-      if (!response.ok) throw new Error("Error al actualizar el envío.");
+      console.log("PUT ->", url, payload);
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body,
+      });
+
+      if (!response.ok)
+        throw new Error(`HTTP ${response.status} ${response.statusText}`);
 
       Swal.fire("Éxito", "Envío actualizado con éxito", "success");
       setIsEditModalOpen(false);
-      loadShipments();
+      await loadShipments();
     } catch (error) {
+      console.error("updateShipment error:", error);
       Swal.fire("Error", "No se pudo actualizar el envío", "error");
     }
   };
@@ -167,7 +172,6 @@ const ListShipments = () => {
       try {
         const token =
           localStorage.getItem("token") || sessionStorage.getItem("token");
-
         const response = await fetch(
           `${API_BASE_URL}/api/shipments/${shipmentId}`,
           {
@@ -262,6 +266,7 @@ const ListShipments = () => {
         closeModal={closeModal}
         setIsEditModalOpen={setIsEditModalOpen}
         shipmentData={selectedShipment}
+        handleSaveShipment={(updated) => updateShipment(updated)}
       />
     </div>
   );
