@@ -26,7 +26,7 @@ const fetchBatches = async (page, search) => {
     localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const response = await fetch(
-    `${API_BASE_URL}/api/batches?page=${page}&search=${search || ""}`,
+    `${API_BASE_URL}/batches?page=${page}&search=${search || ""}`,
     {
       method: "GET",
       headers: {
@@ -119,7 +119,7 @@ const ListBatches = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await fetch(`${API_BASE_URL}/api/batches/${batch.id}`, {
+      const response = await fetch(`${API_BASE_URL}/batches/${batch.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -181,7 +181,7 @@ const ListBatches = () => {
       try {
         const token =
           localStorage.getItem("token") || sessionStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/api/batches/${batchId}`, {
+        const response = await fetch(`${API_BASE_URL}/batches/${batchId}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });

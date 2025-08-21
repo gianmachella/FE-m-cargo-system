@@ -82,7 +82,7 @@ const ShippingWizard = () => {
         boxes: JSON.stringify(dataSteepThree.boxes),
       };
 
-      const response = await fetch(`${API_BASE_URL}/api/shipments`, {
+      const response = await fetch(`${API_BASE_URL}/shipments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

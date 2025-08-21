@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  paymentMethods,
-  shipmentTypeOptions,
-  sizeBoxOptions,
-} from "../../../utilities/options";
+import { paymentMethods, sizeBoxOptions } from "../../../utilities/options";
 
 import ButtonComponent from "../../button/Button";
 import { FaTrashCan } from "react-icons/fa6";
@@ -25,7 +21,11 @@ const Steep3 = (props) => {
   const [totalWeight, setTotalWeight] = useState(0);
   const [totalBoxes, setTotalBoxes] = useState(0);
   const [boxes, setBoxes] = useState([]);
-  const [newBox, setNewBox] = useState({ weight: "", size: "" });
+  const [newBox, setNewBox] = useState({
+    weight: "",
+    size: "",
+    customMeasure: "",
+  });
   const [isWithEnsurance, setIsWithEnsurance] = useState("no");
   const [insuranceValue, setInsuranceValue] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null);
@@ -35,45 +35,57 @@ const Steep3 = (props) => {
 
   const handleBoxAdd = () => {
     const weight = parseFloat(newBox.weight);
-    const selectedSizeOption = sizeBoxOptions.find(
-      (option) => option.value === newBox.size
-    );
 
     if (isNaN(weight) || weight <= 0) {
       Swal.fire("Error", "El peso debe ser un número positivo.", "error");
       return;
     }
 
-    if (!selectedSizeOption) {
-      Swal.fire("Error", "Seleccione un tamaño de caja válido.", "error");
-      return;
+    let volume = 0;
+
+    if (newBox.size !== "personality") {
+      const selectedSizeOption = sizeBoxOptions.find(
+        (option) => option.value === newBox.size
+      );
+
+      if (!selectedSizeOption) {
+        Swal.fire("Error", "Seleccione un tamaño de caja válido.", "error");
+        return;
+      }
+
+      const volumeKey =
+        batchData?.shipmentType === "Marítimo"
+          ? "volumeM"
+          : batchData?.shipmentType === "Aéreo"
+          ? "volumeA"
+          : null;
+
+      if (!volumeKey) {
+        Swal.fire("Error", "El tipo de envío no es válido.", "error");
+        return;
+      }
+
+      volume = selectedSizeOption[volumeKey] || 0;
+    } else {
+      // para personalizado dejamos volumen en 0 (o podrías calcularlo)
+      volume = 0;
     }
 
-    const volumeKey =
-      batchData?.shipmentType === "Marítimo"
-        ? "volumeM"
-        : batchData?.shipmentType === "Aéreo"
-        ? "volumeA"
-        : null;
+    const boxData = {
+      size: newBox.size,
+      weight,
+      customMeasure: newBox.customMeasure || null,
+      volume,
+    };
 
-    if (!volumeKey) {
-      Swal.fire("Error", "El tipo de envío no es válido.", "error");
-      return;
-    }
-
-    setBoxes((prevBoxes) => [
-      ...prevBoxes,
-      { ...newBox, volume: selectedSizeOption[volumeKey] || 0 },
-    ]);
-
-    setNewBox({ weight: "", size: "" });
-
-    setTimeout(() => {
-      setNewBox({ weight: "", size: "" });
-    }, 0);
+    setBoxes((prev) => [...prev, boxData]);
 
     setTotalWeight((prev) => prev + weight);
     setTotalBoxes((prev) => prev + 1);
+
+    // Reiniciar campos e input personalizado
+    setNewBox({ weight: "", size: "", customMeasure: "" });
+    setCustomSize(false);
   };
 
   const handleBoxRemove = (index) => {
@@ -93,7 +105,6 @@ const Steep3 = (props) => {
       const volume = parseFloat(box.volume);
 
       if (isNaN(volume)) {
-        console.warn("Error: Volumen inválido en la caja:", box);
         return acc;
       }
 
@@ -116,12 +127,9 @@ const Steep3 = (props) => {
       paymentMethod,
       declaredValue,
       valuePaid,
-      customSize,
       shipmentType: batchData?.shipmentType,
     });
   };
-
-  useEffect(() => {}, []);
 
   return (
     <FormContainer>
@@ -194,6 +202,18 @@ const Steep3 = (props) => {
             setCustomSize(size === "personality");
           }}
         />
+
+        {customSize && (
+          <Input
+            label="Medida personalizada"
+            placeholder="Ej: 50x40x30"
+            value={newBox.customMeasure}
+            onChange={(e) =>
+              setNewBox({ ...newBox, customMeasure: e.target.value })
+            }
+          />
+        )}
+
         <Input
           label="Peso (lbs)"
           value={newBox.weight}
@@ -215,8 +235,10 @@ const Steep3 = (props) => {
         {boxes.map((box, index) => (
           <li key={index}>
             <div className="box-item">
-              Tamaño: {box.size} - Peso: {box?.weight} lbs. - Volumen:{" "}
-              {box?.volume}{" "}
+              {box.size === "personality"
+                ? `Tamaño: Personalizado (${box.customMeasure})`
+                : `Tamaño: ${box.size}`}
+              {" - "}Peso: {box?.weight} lbs. {" - "}Volumen: {box?.volume}{" "}
               {batchData?.shipmentType === "Aéreo" ? "ft³" : "ft²"}
               <ButtonComponent
                 color="#e63946"

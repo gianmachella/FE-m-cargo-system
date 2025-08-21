@@ -23,7 +23,7 @@ const fetchShipments = async (page, search = "") => {
     search: encodeURIComponent(search.trim()),
   }).toString();
 
-  const response = await fetch(`${API_BASE_URL}/api/shipments?${queryParams}`, {
+  const response = await fetch(`${API_BASE_URL}/shipments?${queryParams}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -125,7 +125,7 @@ const ListShipments = () => {
     try {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
-      const url = `${API_BASE_URL}/api/shipments/${payload.id}`;
+      const url = `${API_BASE_URL}/shipments/${payload.id}`;
 
       // Si tu API espera boxes como string, descomenta:
       // const body = JSON.stringify({ ...payload, boxes: JSON.stringify(payload.boxes) });
@@ -173,7 +173,7 @@ const ListShipments = () => {
         const token =
           localStorage.getItem("token") || sessionStorage.getItem("token");
         const response = await fetch(
-          `${API_BASE_URL}/api/shipments/${shipmentId}`,
+          `${API_BASE_URL}/shipments/${shipmentId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },

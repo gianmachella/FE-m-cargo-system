@@ -74,9 +74,6 @@ const Nav = (props) => {
           <a href="/">
             <img src={logo} width="150" className="m-1" alt="Logo" />
           </a>
-          {/* <div onClick={collapse}>
-            <BiMenu className="icon-menu-collapse" />
-          </div> */}
         </div>
         <Button
           onClick={handleLogout}

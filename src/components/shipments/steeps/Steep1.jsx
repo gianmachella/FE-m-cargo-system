@@ -23,7 +23,7 @@ export const Steep1 = (props) => {
   const loadClients = async (searchTerm) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/clients?search=${searchTerm || ""}`
+        `${API_BASE_URL}/clients?search=${searchTerm || ""}`
       );
       const result = await response.json();
       setClients(result.data || []);
@@ -37,7 +37,7 @@ export const Steep1 = (props) => {
   const loadReceivers = async (clientId) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/clients/${clientId}/receivers`
+        `${API_BASE_URL}/clients/${clientId}/receivers`
       );
       const result = await response.json();
 

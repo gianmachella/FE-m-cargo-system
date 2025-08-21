@@ -160,7 +160,7 @@ const CreateClient = () => {
   const handleSendEmail = async (clientData) => {
     console.log(clientData);
 
-    const response = await fetch(`${API_BASE_URL}/api/send-email`, {
+    const response = await fetch(`${API_BASE_URL}/send-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -214,7 +214,7 @@ const CreateClient = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/clients`, {
+      const response = await fetch(`${API_BASE_URL}/clients`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -26,7 +26,7 @@ const CreateBatch = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await fetch(`${API_BASE_URL}/api/batches`, {
+      const response = await fetch(`${API_BASE_URL}/batches`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

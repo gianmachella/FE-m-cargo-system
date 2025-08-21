@@ -19,7 +19,7 @@ const fetchClients = async (page, search) => {
     localStorage.getItem("token") || sessionStorage.getItem("token");
 
   const response = await fetch(
-    `${API_BASE_URL}/api/clients?page=${page}&search=${search || ""}`,
+    `${API_BASE_URL}/clients?page=${page}&search=${search || ""}`,
     {
       method: "GET",
       headers: {
@@ -53,7 +53,7 @@ const ListClients = () => {
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
       const response = await fetch(
-        `${API_BASE_URL}/api/clients/${clientId}/receivers`,
+        `${API_BASE_URL}/clients/${clientId}/receivers`,
         {
           method: "GET",
           headers: {
@@ -100,15 +100,12 @@ const ListClients = () => {
       try {
         const token =
           localStorage.getItem("token") || sessionStorage.getItem("token");
-        const response = await fetch(
-          `${API_BASE_URL}/api/clients/${clientId}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/clients/${clientId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (response.ok) {
           await loadClients();
@@ -133,7 +130,7 @@ const ListClients = () => {
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
       const clientResponse = await fetch(
-        `${API_BASE_URL}/api/clients/${selectedClient.id}`,
+        `${API_BASE_URL}/clients/${selectedClient.id}`,
         {
           method: "PUT",
           headers: {

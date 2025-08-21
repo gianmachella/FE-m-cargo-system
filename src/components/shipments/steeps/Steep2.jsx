@@ -15,7 +15,7 @@ const Steep2 = (props) => {
 
   const loadBatches = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/batches`);
+      const response = await fetch(`${API_BASE_URL}/batches`);
       const result = await response.json();
       setBatches(result.data || []);
     } catch (error) {
