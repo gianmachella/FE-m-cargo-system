@@ -231,7 +231,7 @@ const CreateClient = () => {
           icon: "success",
         });
 
-        handleSendEmail(clientData);
+        //handleSendEmail(clientData);
         resetForm();
       } else {
         const errorData = await response.json();
