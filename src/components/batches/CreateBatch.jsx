@@ -38,8 +38,6 @@ const CreateBatch = () => {
           shipmentType,
           status,
           shipmentDate,
-          createdBy,
-          updatedBy: createdBy,
         }),
       });
 
