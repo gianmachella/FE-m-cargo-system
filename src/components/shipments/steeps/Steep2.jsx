@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { formatSimpleFecha, formatarFecha } from "../../../utilities/utilities";
 
 import API_BASE_URL from "../../../config/config";
 import ButtonComponent from "../../button/Button";
 import { FormContainer } from "../../form/Form";
 import Select from "../../select/SelectComponent";
 import Swal from "sweetalert2";
-import { formatarFecha } from "../../../utilities/utilities";
 
 const Steep2 = (props) => {
   const { setDataSteepTwo, handleNextStep, handlePreviousStep } = props;
@@ -15,9 +15,29 @@ const Steep2 = (props) => {
 
   const loadBatches = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/batches`);
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      // 🚀 pedimos todos los lotes (limit grande) y ordenados
+      const response = await fetch(
+        `${API_BASE_URL}/batches?page=1&limit=1000`, // 👈 así nos aseguramos de traer todos
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Error al cargar los lotes");
+
       const result = await response.json();
-      setBatches(result.data || []);
+
+      // 🚀 Ordenamos en FE por createdAt DESC por si acaso
+      const sorted = (result.data || []).sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setBatches(sorted);
     } catch (error) {
       console.error("Error loading batches:", error);
       Swal.fire("Error", "No se pudieron cargar los lotes.", "error");
@@ -26,7 +46,6 @@ const Steep2 = (props) => {
 
   useEffect(() => {
     loadBatches();
-    console.log(selectedBatch);
   }, []);
 
   return (
@@ -35,10 +54,10 @@ const Steep2 = (props) => {
       <Select
         label="Lote"
         width="300px"
-        value={selectedBatch?.id}
+        value={selectedBatch?.id || ""}
         options={batches.map((batch) => ({
           value: batch.id,
-          label: batch.batchNumber,
+          label: `${batch.batchNumber} - ${formatSimpleFecha(batch.createdAt)}`, // 👈 simple
         }))}
         onChange={(e) =>
           setSelectedBatch(

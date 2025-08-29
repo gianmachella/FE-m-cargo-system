@@ -70,15 +70,11 @@ const ShippingWizard = () => {
         totalBoxes: dataSteepThree.totalBoxes,
         status: "recibido en almacen",
         receiverId: dataSteepOne.receiverData.id,
-        createdBy: 1,
-        updatedBy: 1,
         insurance: dataSteepThree.isWithEnsurance,
         insuranceValue: dataSteepThree.insuranceValue || "0",
         paymentMethod: dataSteepThree.paymentMethod,
         declaredValue: dataSteepThree.declaredValue,
         valuePaid: dataSteepThree.valuePaid,
-        createdAt: new Date(),
-        updatedAt: new Date(),
         boxes: JSON.stringify(dataSteepThree.boxes),
       };
 
