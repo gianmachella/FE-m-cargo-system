@@ -68,7 +68,7 @@ const ModalEditClient = (props) => {
     const updatedClient = { ...clientData, receivers: receptors };
 
     try {
-      // 1️⃣ Actualizar el cliente
+      // 1️⃣ Actualizar el cliente (paso el updatedClient)
       await updateClient(updatedClient);
 
       // 2️⃣ Actualizar receptores existentes
@@ -415,8 +415,6 @@ const ModalEditClient = (props) => {
               text={isEditing ? "Guardar Cambios" : "Editar"}
               onClick={() => {
                 if (isEditing) {
-                  updateClient();
-                  updateReceiver(receptors[receiverIndexToEdit]);
                   handleSaveChanges();
                 } else {
                   setIsEditing(true);

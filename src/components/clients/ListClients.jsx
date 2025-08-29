@@ -119,8 +119,8 @@ const ListClients = () => {
     }
   };
 
-  const updateClient = async () => {
-    if (!selectedClient.firstName || !selectedClient.email) {
+  const updateClient = async (client) => {
+    if (!client.firstName || !client.email) {
       Swal.fire("Error", "Nombre y Email son obligatorios", "error");
       return;
     }
@@ -130,7 +130,7 @@ const ListClients = () => {
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
       const clientResponse = await fetch(
-        `${API_BASE_URL}/clients/${selectedClient.id}`,
+        `${API_BASE_URL}/clients/${client.id}`,
         {
           method: "PUT",
           headers: {
@@ -138,43 +138,18 @@ const ListClients = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            firstName: selectedClient.firstName,
-            lastName: selectedClient.lastName,
-            phone: selectedClient.phone,
-            email: selectedClient.email,
+            firstName: client.firstName,
+            lastName: client.lastName,
+            phone: client.phone,
+            email: client.email,
           }),
         }
       );
 
       if (!clientResponse.ok) throw new Error("Error al actualizar cliente.");
-
-      const receivers = selectedClient.receivers || [];
-
-      const existingReceivers = receivers.filter((receiver) => receiver.id);
-      for (const receiver of existingReceivers) {
-        console.log("Actualizando receptor:", receiver);
-        await updateReceiver(receiver);
-      }
-
-      const newReceivers = receivers.filter((receiver) => !receiver.id);
-
-      for (const newReceiver of newReceivers) {
-        await createReceiver({ ...newReceiver, clientId: selectedClient.id });
-      }
-
-      Swal.fire(
-        "Éxito",
-        "Cliente y receptores actualizados con éxito",
-        "success"
-      );
-      setIsEditModalOpen(false);
-      loadClients();
+      return await clientResponse.json();
     } catch (error) {
-      Swal.fire(
-        "Error",
-        error.message || "No se pudo actualizar el cliente",
-        "error"
-      );
+      Swal.fire("Error", error.message, "error");
     }
   };
 
@@ -387,7 +362,7 @@ const ListClients = () => {
         isEditModalOpen={isEditModalOpen}
         closeModal={() => setIsEditModalOpen(false)}
         selectedClient={selectedClient}
-        updateClient={updateClient}
+        updateClient={updateClient} // ahora recibe el client actualizado
         updateReceiver={updateReceiver}
         createReceiver={createReceiver}
       />

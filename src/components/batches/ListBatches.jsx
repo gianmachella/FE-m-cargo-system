@@ -285,6 +285,7 @@ const ListBatches = () => {
               label="Número de Lote"
               value={selectedBatch.batchNumber}
               inputText={selectedBatch.batchNumber}
+              disabled
               onChange={(e) =>
                 setSelectedBatch({
                   ...selectedBatch,
@@ -303,6 +304,7 @@ const ListBatches = () => {
                 })
               }
               options={countryOptions}
+              disabled
             />
 
             <Select
@@ -324,6 +326,7 @@ const ListBatches = () => {
                 })
               }
               options={shipmentTypeOptions}
+              disabled
             />
 
             <div className="button-save">

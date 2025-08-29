@@ -10,7 +10,7 @@ const Select = ({
   value = "",
   onChange = () => {},
   name = "",
-  disabled = false,
+  disabled,
   width = "100%", // Nueva propiedad para personalizar el ancho
 }) => {
   return (
