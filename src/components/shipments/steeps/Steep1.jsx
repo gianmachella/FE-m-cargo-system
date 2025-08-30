@@ -22,13 +22,14 @@ export const Steep1 = (props) => {
 
   const loadClients = async (searchTerm) => {
     try {
-      const token = localStorage.getItem("token"); // 👈 ejemplo
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
       const response = await fetch(
         `${API_BASE_URL}/clients?search=${searchTerm || ""}`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 👈 agregado
+            Authorization: `Bearer ${token}`,
           },
         }
       );
