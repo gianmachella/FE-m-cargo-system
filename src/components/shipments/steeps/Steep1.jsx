@@ -22,8 +22,15 @@ export const Steep1 = (props) => {
 
   const loadClients = async (searchTerm) => {
     try {
+      const token = localStorage.getItem("token"); // 👈 ejemplo
       const response = await fetch(
-        `${API_BASE_URL}/clients?search=${searchTerm || ""}`
+        `${API_BASE_URL}/clients?search=${searchTerm || ""}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 👈 agregado
+          },
+        }
       );
       const result = await response.json();
       setClients(result.data || []);
@@ -36,11 +43,17 @@ export const Steep1 = (props) => {
 
   const loadReceivers = async (clientId) => {
     try {
+      const token = localStorage.getItem("token"); // 👈 ejemplo
       const response = await fetch(
-        `${API_BASE_URL}/clients/${clientId}/receivers`
+        `${API_BASE_URL}/clients/${clientId}/receivers`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 👈 agregado
+          },
+        }
       );
       const result = await response.json();
-
       setReceivers(Array.isArray(result) ? result : []);
     } catch (error) {
       console.error("Error loading receivers:", error);
