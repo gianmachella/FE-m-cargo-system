@@ -122,7 +122,7 @@ export const Steep1 = (props) => {
         isOpen={openAccordionCustomer}
         onToggle={setOpenAccordionCustomer}
       >
-        {selectedClient.length && (
+        {selectedClient.length > 0 && (
           <FormSection>
             <div className="form-par">
               <Input
@@ -172,7 +172,7 @@ export const Steep1 = (props) => {
         isOpen={openAccordionReceiver}
         onToggle={setOpenAccordionReceiver}
       >
-        {selectedReceiver && (
+        {selectedReceiver.length > 0 && (
           <FormSection>
             <div className="form-par">
               <Input
@@ -221,7 +221,7 @@ export const Steep1 = (props) => {
             receiverData: selectedReceiver[0],
           });
         }}
-        disabled={!selectedClient || !selectedReceiver}
+        disabled={!selectedClient.length || !selectedReceiver.length}
       />
     </FormContainer>
   );

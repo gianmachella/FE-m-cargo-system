@@ -37,8 +37,6 @@ const ShippingWizard = () => {
   };
 
   const handleSendEmail = async (shipmentData, clientData, receiverData) => {
-    console.log("Enviando email a:", clientData.email);
-
     const response = await fetch(`${API_BASE_URL}/send-email`, {
       method: "POST",
       headers: {
@@ -47,7 +45,7 @@ const ShippingWizard = () => {
       body: JSON.stringify({
         to: clientData.email,
         data: shipmentData,
-        subject: `Bienvenido ${clientData.firstName} ${clientData.lastName}}`,
+        subject: `Bienvenido ${clientData.firstName} ${clientData.lastName}`,
         type: "newShipment",
         receiverData: receiverData,
         clientData: clientData,
