@@ -137,7 +137,7 @@ const ShippingWizard = () => {
     } catch (error) {
       Swal.fire("Error", "Hubo un problema al generar el PDF.", "error");
     } finally {
-      setShowPDFContent(false);
+      //setShowPDFContent(false);
     }
   };
 
