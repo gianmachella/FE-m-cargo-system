@@ -37,7 +37,9 @@ const ShippingWizard = () => {
   };
 
   const handleSendEmail = async (shipmentData, clientData, receiverData) => {
-    const response = await fetch(`${API_BASE_URL}/api/send-email`, {
+    console.log("Enviando email a:", clientData.email);
+
+    const response = await fetch(`${API_BASE_URL}/send-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,6 +63,8 @@ const ShippingWizard = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
+      const today = new Date().toISOString().split("T")[0];
+
       const shipmentData = {
         batchId: dataSteepTwo.id,
         shipmentNumber: dataSteepThree.shipmentNumber,
@@ -76,8 +80,8 @@ const ShippingWizard = () => {
         declaredValue: dataSteepThree.declaredValue,
         valuePaid: dataSteepThree.valuePaid,
         boxes: JSON.stringify(dataSteepThree.boxes),
+        date: today,
       };
-
       const response = await fetch(`${API_BASE_URL}/shipments`, {
         method: "POST",
         headers: {

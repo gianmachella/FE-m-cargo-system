@@ -44,7 +44,8 @@ export const Steep1 = (props) => {
 
   const loadReceivers = async (clientId) => {
     try {
-      const token = localStorage.getItem("token"); // 👈 ejemplo
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
       const response = await fetch(
         `${API_BASE_URL}/clients/${clientId}/receivers`,
         {
