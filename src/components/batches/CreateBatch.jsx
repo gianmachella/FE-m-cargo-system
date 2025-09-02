@@ -1,13 +1,13 @@
 import "./CreateBatch.css";
 
 import React, { useState } from "react";
-import { countryOptions, statusOptions } from "../../utilities/options";
 
 import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
 import Input from "../inputs/InputComponent";
 import Select from "../select/SelectComponent";
 import Swal from "sweetalert2";
+import { countryOptions } from "../../utilities/options";
 import { useNavigate } from "react-router-dom";
 
 const CreateBatch = () => {
@@ -15,7 +15,6 @@ const CreateBatch = () => {
   const [destinationCountry, setDestinationCountry] = useState("Venezuela");
   const [shipmentType, setShipmentType] = useState("Marítimo");
   const [status, setStatus] = useState("Recibido en Almacen");
-  const [createdBy, setCreatedBy] = useState(1);
   const [shipmentDate, setShipmentDate] = useState("");
   const navigate = useNavigate();
 
@@ -55,54 +54,42 @@ const CreateBatch = () => {
     <div className="create-batch-container">
       <h1>Crear Lote</h1>
       <form onSubmit={handleSubmit} className="create-batch-form">
-        <div className="form-group">
-          <Input
-            label="Número de Lote"
-            placeholder="Ingrese el número de lote"
-            value={batchNumber}
-            inputText={batchNumber}
-            onChange={(e) => setBatchNumber(e.target.value)}
-            required
-          />
-        </div>
+        <Input
+          label="Número de Lote"
+          placeholder="Ingrese el número de lote"
+          value={batchNumber}
+          onChange={(e) => setBatchNumber(e.target.value)}
+          required
+        />
 
-        <div className="form-group">
-          <Select
-            label="Destino"
-            value={destinationCountry}
-            inputText={destinationCountry}
-            onChange={(e) => setDestinationCountry(e.target.value)}
-            options={countryOptions}
-          />
-        </div>
+        <Select
+          label="Destino"
+          value={destinationCountry}
+          onChange={(e) => setDestinationCountry(e.target.value)}
+          options={countryOptions}
+        />
 
-        <div className="form-group">
-          <Select
-            label="Tipo de Envío"
-            value={shipmentType}
-            inputText={shipmentType}
-            onChange={(e) => setShipmentType(e.target.value)}
-            options={[
-              { label: "Marítimo", value: "Marítimo" },
-              { label: "Aéreo", value: "Aéreo" },
-              { label: "Terrestre", value: "Terrestre" },
-            ]}
-          />
-        </div>
+        <Select
+          label="Tipo de Envío"
+          value={shipmentType}
+          onChange={(e) => setShipmentType(e.target.value)}
+          options={[
+            { label: "Marítimo", value: "Marítimo" },
+            { label: "Aéreo", value: "Aéreo" },
+            { label: "Terrestre", value: "Terrestre" },
+          ]}
+        />
 
-        <div className="form-group">
-          <Input
-            label="Fecha de salida"
-            inputType="date"
-            value={shipmentDate}
-            inputText={shipmentDate}
-            onChange={(e) => setShipmentDate(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <Input label="Estatus" value={status} inputText={status} disabled />
-        </div>
+        <Input
+          label="Fecha de salida"
+          inputType="date"
+          value={shipmentDate}
+          onChange={(e) => setShipmentDate(e.target.value)}
+        />
 
+        <Input label="Estatus" value={status} inputText={status} disabled />
+
+        {/* Botón al final ocupa las 2 columnas */}
         <div className="form-actions">
           <Button
             text="Crear Lote"

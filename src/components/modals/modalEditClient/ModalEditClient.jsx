@@ -1,144 +1,129 @@
-import { FormContainer, FormSection } from "../../form/Form";
 import React, { useEffect, useState } from "react";
+import {
+  fetchCities,
+  fetchCountries,
+  fetchStates,
+} from "../../../services/cscApi";
 
 import ButtonComponent from "../../button/Button";
-import { FaPen } from "react-icons/fa6";
-import Input from "../../inputs/InputComponent";
+import ClientForm from "./ClientForm";
+import { FormContainer } from "../../form/Form";
 import Modal from "react-modal";
-import Select from "../../select/SelectComponent";
+import ReceiverForm from "./ReceiverForm";
+import ReceiversList from "./ReceiversList";
 import Swal from "sweetalert2";
-import { countryOptions } from "../../../utilities/options";
 
-const ModalEditClient = (props) => {
-  const {
-    isEditModalOpen,
-    closeModal,
-    selectedClient,
-    updateClient,
-    updateReceiver,
-    createReceiver,
-  } = props;
-
-  const [clientData, setClientData] = useState({});
-  const [receptors, setReceptors] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isEditingReceiver, setIsEditingReceiver] = useState(false);
-  const [isNewReceiver, setIsNewReceiver] = useState(false);
-  const [receiverIndexToEdit, setReceiverIndexToEdit] = useState(null);
-  const [newReceiver, setNewReceiver] = useState({
+const ModalEditClient = ({
+  isEditModalOpen,
+  closeModal,
+  selectedClient,
+  updateClient,
+  updateReceiver,
+  createReceiver,
+}) => {
+  // ✅ inicializar con strings vacíos
+  const [clientData, setClientData] = useState({
+    id: "",
     firstName: "",
     lastName: "",
     phone: "",
-    address: "",
-    city: "",
-    state: "",
-    country: "",
+    email: "",
   });
 
+  const [receptors, setReceptors] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [isEditingReceiver, setIsEditingReceiver] = useState(false);
+  const [isNewReceiver, setIsNewReceiver] = useState(false);
+  const [receiverIndexToEdit, setReceiverIndexToEdit] = useState(null);
+
+  const [newReceiver, setNewReceiver] = useState({});
+  const [countryList, setCountryList] = useState([]);
+  const [stateList, setStateList] = useState([]);
+  const [cityList, setCityList] = useState([]);
+  const [editStateList, setEditStateList] = useState([]);
+  const [editCityList, setEditCityList] = useState([]);
+
+  // Load client info
   useEffect(() => {
     if (selectedClient) {
-      setClientData({ ...selectedClient });
-      setReceptors(
-        selectedClient.receivers ? [...selectedClient.receivers] : []
-      );
+      setClientData({
+        id: selectedClient.id || "",
+        firstName: selectedClient.firstName || "",
+        lastName: selectedClient.lastName || "",
+        phone: selectedClient.phone || "",
+        email: selectedClient.email || "",
+      });
+      setReceptors(selectedClient.receivers || []);
     }
   }, [selectedClient]);
+
+  // Countries
+  useEffect(() => {
+    fetchCountries().then(setCountryList).catch(console.error);
+  }, []);
+
+  // States & Cities for new receiver
+  useEffect(() => {
+    if (newReceiver.country) {
+      fetchStates(newReceiver.country).then(setStateList).catch(console.error);
+    }
+  }, [newReceiver.country]);
+
+  useEffect(() => {
+    if (newReceiver.country && newReceiver.state) {
+      fetchCities(newReceiver.country, newReceiver.state)
+        .then(setCityList)
+        .catch(console.error);
+    }
+  }, [newReceiver.country, newReceiver.state]);
+
+  // States & Cities for edit receiver
+  const receptorToEdit = receptors[receiverIndexToEdit] || {};
+
+  useEffect(() => {
+    if (isEditingReceiver && receptorToEdit?.country) {
+      fetchStates(receptorToEdit.country)
+        .then(setEditStateList)
+        .catch(console.error);
+    }
+  }, [isEditingReceiver, receiverIndexToEdit]);
+
+  useEffect(() => {
+    if (isEditingReceiver && receptorToEdit?.country && receptorToEdit?.state) {
+      fetchCities(receptorToEdit.country, receptorToEdit.state)
+        .then(setEditCityList)
+        .catch(console.error);
+    }
+  }, [isEditingReceiver, receiverIndexToEdit]);
 
   const handleClientChange = (field, value) => {
     setClientData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleReceiverChange = (index, field, value) => {
-    const updatedReceivers = [...receptors];
-    updatedReceivers[index] = { ...updatedReceivers[index], [field]: value };
-    setReceptors(updatedReceivers);
-  };
-
-  const handleEditReceiver = (index) => {
-    setReceiverIndexToEdit(index);
-    setIsEditingReceiver(true);
-    setIsNewReceiver(false);
-  };
-
-  const handleNewReceiverChange = (field, value) => {
-    setNewReceiver((prev) => ({ ...prev, [field]: value }));
+    const updated = [...receptors];
+    updated[index] = { ...updated[index], [field]: value };
+    setReceptors(updated);
   };
 
   const handleSaveChanges = async () => {
-    const updatedClient = { ...clientData, receivers: receptors };
-
+    const updatedClient = { ...clientData, receptors };
     try {
-      // 1️⃣ Actualizar el cliente (paso el updatedClient)
       await updateClient(updatedClient);
-
-      // 2️⃣ Actualizar receptores existentes
-      for (const receiver of receptors) {
-        if (receiver.id) {
-          await updateReceiver(receiver);
-        } else {
-          // 3️⃣ Crear receptores nuevos con el clientId correcto
-          console.log("Creando receptor:", receiver);
-          await createReceiver({ ...receiver, clientId: clientData.id });
-        }
+      for (const r of receptors) {
+        if (r.id) await updateReceiver(r, clientData.id);
+        else await createReceiver({ ...r, clientId: clientData.id });
       }
-
       Swal.fire(
         "Éxito",
         "Cliente y receptores actualizados con éxito",
         "success"
       );
       closeModal();
-    } catch (error) {
-      Swal.fire(
-        "Error",
-        "No se pudo actualizar el cliente y sus receptores",
-        "error"
-      );
+    } catch {
+      Swal.fire("Error", "No se pudo actualizar el cliente", "error");
     }
-  };
-
-  const handleSaveEditedReceiver = () => {
-    if (receiverIndexToEdit !== null) {
-      const updatedReceivers = [...receptors];
-      updatedReceivers[receiverIndexToEdit] = {
-        ...updatedReceivers[receiverIndexToEdit],
-      };
-
-      setReceptors(updatedReceivers);
-      setIsEditingReceiver(false);
-      setReceiverIndexToEdit(null);
-    }
-  };
-
-  const addReceptor = () => {
-    if (
-      !newReceiver.firstName ||
-      !newReceiver.lastName ||
-      !newReceiver.phone ||
-      !newReceiver.address ||
-      !newReceiver.city ||
-      !newReceiver.state ||
-      !newReceiver.country
-    ) {
-      alert("Todos los campos son obligatorios para agregar un receptor.");
-      return;
-    }
-
-    const updatedReceptors = [...receptors, { ...newReceiver, id: null }];
-
-    setReceptors(updatedReceptors);
-
-    setNewReceiver({
-      firstName: "",
-      lastName: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      country: "",
-    });
-
-    setIsNewReceiver(false);
   };
 
   return (
@@ -153,273 +138,75 @@ const ModalEditClient = (props) => {
       {clientData.id ? (
         <FormContainer>
           <h1>{isEditing ? "Editar Cliente" : "Ver Cliente"}</h1>
-          <div className="form-wrapper-horizontal">
-            <div className="client-section">
-              <FormSection title={isEditing ? "Editar Cliente" : "Cliente"}>
-                <Input
-                  disabled={!isEditing}
-                  label="Nombre"
-                  value={clientData.firstName || ""}
-                  inputText={clientData.firstName}
-                  onChange={(e) =>
-                    handleClientChange("firstName", e.target.value)
-                  }
-                />
-                <Input
-                  disabled={!isEditing}
-                  label="Apellido"
-                  value={clientData.lastName || ""}
-                  inputText={clientData.lastName}
-                  onChange={(e) =>
-                    handleClientChange("lastName", e.target.value)
-                  }
-                />
-                <Input
-                  disabled={!isEditing}
-                  label="Teléfono"
-                  value={clientData.phone || ""}
-                  inputText={clientData.phone}
-                  onChange={(e) => handleClientChange("phone", e.target.value)}
-                />
-                <Input
-                  disabled={!isEditing}
-                  label="Email"
-                  value={clientData.email || ""}
-                  inputText={clientData.email}
-                  onChange={(e) => handleClientChange("email", e.target.value)}
-                />
-              </FormSection>
+
+          <div
+            style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}
+          >
+            {/* Cliente a la izquierda */}
+            <div style={{ flex: 1 }}>
+              <ClientForm
+                clientData={clientData}
+                isEditing={isEditing}
+                onChange={handleClientChange}
+              />
             </div>
 
-            <div className="receptor-section">
-              <h3>Receptores</h3>
-              {receptors.length > 0 ? (
-                receptors.map((receptor, index) => (
-                  <div key={index} className="receptor-item">
-                    <p>
-                      {receptor.firstName} {receptor.lastName} -{" "}
-                      {receptor.phone}
-                    </p>
-                    {isEditing && (
-                      <ButtonComponent
-                        onClick={() => handleEditReceiver(index)}
-                        size="extrasmall"
-                        color="#00b4d8"
-                        shape="circular"
-                        icon={<FaPen />}
-                      />
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p>No hay receptores registrados.</p>
-              )}
-              {isEditing && !isNewReceiver && !isEditingReceiver && (
-                <ButtonComponent
-                  onClick={() => setIsNewReceiver(true)}
-                  size="small"
-                  color="#00b4d8"
-                  text="Agregar"
-                />
-              )}
+            {/* Receptores a la derecha */}
+            <div style={{ flex: 1 }}>
+              <ReceiversList
+                receptors={receptors}
+                isEditing={isEditing}
+                onEdit={(i) => {
+                  setReceiverIndexToEdit(i);
+                  setIsEditingReceiver(true);
+                  setIsNewReceiver(false);
+                }}
+                onAdd={() => setIsNewReceiver(true)}
+              />
 
               {isEditingReceiver && (
-                <FormSection title="Editar Receptor">
-                  <Input
-                    label="Nombre"
-                    value={receptors[receiverIndexToEdit]?.firstName || ""}
-                    inputText={receptors[receiverIndexToEdit]?.firstName || ""}
-                    onChange={(e) =>
-                      handleReceiverChange(
-                        receiverIndexToEdit,
-                        "firstName",
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Input
-                    label="Apellido"
-                    value={receptors[receiverIndexToEdit]?.lastName || ""}
-                    inputText={receptors[receiverIndexToEdit]?.lastName || ""}
-                    onChange={(e) =>
-                      handleReceiverChange(
-                        receiverIndexToEdit,
-                        "lastName",
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Input
-                    label="Teléfono"
-                    value={receptors[receiverIndexToEdit]?.phone || ""}
-                    inputText={receptors[receiverIndexToEdit]?.phone || ""}
-                    onChange={(e) =>
-                      handleReceiverChange(
-                        receiverIndexToEdit,
-                        "phone",
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Input
-                    label="Dirreccion"
-                    value={receptors[receiverIndexToEdit]?.address || ""}
-                    inputText={receptors[receiverIndexToEdit]?.address || ""}
-                    onChange={(e) =>
-                      handleReceiverChange(
-                        receiverIndexToEdit,
-                        "address",
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Input
-                    label="Ciudad"
-                    value={receptors[receiverIndexToEdit]?.city || ""}
-                    inputText={receptors[receiverIndexToEdit]?.city || ""}
-                    onChange={(e) =>
-                      handleReceiverChange(
-                        receiverIndexToEdit,
-                        "city",
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Input
-                    label="Estado/Provincia"
-                    value={receptors[receiverIndexToEdit]?.state || ""}
-                    inputText={receptors[receiverIndexToEdit]?.state || ""}
-                    onChange={(e) =>
-                      handleReceiverChange(
-                        receiverIndexToEdit,
-                        "state",
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Select
-                    label="País"
-                    placeholder="Selecciona un país"
-                    value={receptors[receiverIndexToEdit]?.country || ""}
-                    inputText={receptors[receiverIndexToEdit]?.country || ""}
-                    onChange={(e) =>
-                      handleReceiverChange(
-                        receiverIndexToEdit,
-                        "country",
-                        e.target.value
-                      )
-                    }
-                    options={countryOptions}
-                  />
-
-                  <div className="button-save">
-                    <ButtonComponent
-                      text="Guardar Cambios"
-                      onClick={() => {
-                        setIsEditingReceiver(false);
-                        handleSaveEditedReceiver();
-                      }}
-                      size="small"
-                      color={"#57cc99"}
-                    />
-                    <ButtonComponent
-                      text="Cancelar"
-                      onClick={() => setIsEditingReceiver(false)}
-                      size="small"
-                      color={"#e63946"}
-                    />
-                  </div>
-                </FormSection>
+                <ReceiverForm
+                  receiver={receptorToEdit}
+                  onChange={(f, v) =>
+                    handleReceiverChange(receiverIndexToEdit, f, v)
+                  }
+                  onSave={() => setIsEditingReceiver(false)}
+                  onCancel={() => setIsEditingReceiver(false)}
+                  countryList={countryList}
+                  stateList={editStateList}
+                  cityList={editCityList}
+                />
               )}
 
               {isNewReceiver && (
-                <FormSection title="Nuevo Receptor">
-                  <Input
-                    label="Nombre"
-                    value={newReceiver.firstName}
-                    inputText={newReceiver.firstName}
-                    onChange={(e) =>
-                      handleNewReceiverChange("firstName", e.target.value)
-                    }
-                  />
-                  <Input
-                    label="Apellido"
-                    value={newReceiver.lastName}
-                    inputText={newReceiver.lastName}
-                    onChange={(e) =>
-                      handleNewReceiverChange("lastName", e.target.value)
-                    }
-                  />
-                  <Input
-                    label="Teléfono"
-                    value={newReceiver.phone}
-                    inputText={newReceiver.phone}
-                    onChange={(e) =>
-                      handleNewReceiverChange("phone", e.target.value)
-                    }
-                  />
-                  <Input
-                    label="Dirreccion"
-                    value={newReceiver.address || ""}
-                    inputText={newReceiver.address || ""}
-                    onChange={(e) =>
-                      handleNewReceiverChange("address", e.target.value)
-                    }
-                  />
-                  <Input
-                    label="Ciudad"
-                    value={newReceiver.city || ""}
-                    inputText={newReceiver.city || ""}
-                    onChange={(e) =>
-                      handleNewReceiverChange("city", e.target.value)
-                    }
-                  />
-                  <Input
-                    label="Estado/Provincia"
-                    value={newReceiver.state || ""}
-                    inputText={newReceiver.state || ""}
-                    onChange={(e) =>
-                      handleNewReceiverChange("state", e.target.value)
-                    }
-                  />
-                  <Select
-                    label="País"
-                    placeholder="Selecciona un país"
-                    value={newReceiver.country || ""}
-                    inputText={newReceiver.country || ""}
-                    onChange={(e) =>
-                      handleNewReceiverChange("country", e.target.value)
-                    }
-                    options={countryOptions}
-                  />
-                  <div className="button-save">
-                    <ButtonComponent
-                      text="Agregar"
-                      onClick={addReceptor}
-                      size="small"
-                      color="#4cc9f0"
-                    />
-                    <ButtonComponent
-                      text="Cancelar"
-                      onClick={() => setIsNewReceiver(false)}
-                      size="small"
-                      color={"#e63946"}
-                    />
-                  </div>
-                </FormSection>
+                <ReceiverForm
+                  receiver={newReceiver}
+                  onChange={(f, v) => setNewReceiver((p) => ({ ...p, [f]: v }))}
+                  onSave={() => {
+                    setReceptors((prev) => [
+                      ...prev,
+                      { ...newReceiver, id: null },
+                    ]);
+                    setNewReceiver({});
+                    setIsNewReceiver(false);
+                  }}
+                  onCancel={() => setIsNewReceiver(false)}
+                  countryList={countryList}
+                  stateList={stateList}
+                  cityList={cityList}
+                  isNew
+                />
               )}
             </div>
           </div>
-          <div className="button-save">
+
+          {/* Botones finales */}
+          <div className="button-save" style={{ marginTop: "20px" }}>
             <ButtonComponent
               text={isEditing ? "Guardar Cambios" : "Editar"}
-              onClick={() => {
-                if (isEditing) {
-                  handleSaveChanges();
-                } else {
-                  setIsEditing(true);
-                }
-              }}
+              onClick={() =>
+                isEditing ? handleSaveChanges() : setIsEditing(true)
+              }
               size="medium"
               color="#57cc99"
             />
@@ -429,16 +216,13 @@ const ModalEditClient = (props) => {
                 if (isEditing) {
                   setIsEditing(false);
                   setIsNewReceiver(false);
-                } else {
-                  closeModal();
-                }
+                } else closeModal();
               }}
               size="medium"
               color={isEditing ? "#fbfbfb" : "#e63946"}
               textColor={isEditing ? "black" : "white"}
             />
           </div>
-          ;
         </FormContainer>
       ) : (
         <p>Cargando datos del cliente...</p>

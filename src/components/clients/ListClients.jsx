@@ -158,7 +158,7 @@ const ListClients = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await fetch(`${API_BASE_URL}/api/receivers`, {
+      const response = await fetch(`${API_BASE_URL}/receivers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -190,17 +190,14 @@ const ListClients = () => {
         localStorage.getItem("token") || sessionStorage.getItem("token");
       console.log(receiver);
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/receivers/${receiver.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(receiver),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/receivers/${receiver.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(receiver),
+      });
 
       if (!response.ok) throw new Error("Error al actualizar receptor.");
 
@@ -359,10 +356,11 @@ const ListClients = () => {
         activeClassName={"active"}
       />
       <ModalEditClient
+        key={selectedClient?.id || "new"}
         isEditModalOpen={isEditModalOpen}
         closeModal={() => setIsEditModalOpen(false)}
         selectedClient={selectedClient}
-        updateClient={updateClient} // ahora recibe el client actualizado
+        updateClient={updateClient}
         updateReceiver={updateReceiver}
         createReceiver={createReceiver}
       />

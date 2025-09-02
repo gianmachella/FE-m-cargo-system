@@ -3,6 +3,11 @@ import "./CreateClient.css";
 import { BsFillPencilFill, BsX } from "react-icons/bs";
 import { FormContainer, FormSection } from "../form/Form";
 import React, { useEffect, useState } from "react";
+import {
+  fetchCities,
+  fetchCountries,
+  fetchStates,
+} from "../../services/cscApi";
 
 import API_BASE_URL from "../../config/config";
 import Button from "../button/Button";
@@ -37,6 +42,10 @@ const CreateClient = () => {
   const [receptorDataValid, setReceptorDataValid] = useState(false);
   const [clientDataValid, setClientDataValid] = useState(false);
   const [disableSaveClient, setDisableSaveClient] = useState(true);
+
+  const [countryList, setCountryList] = useState([]);
+  const [stateList, setStateList] = useState([]);
+  const [cityList, setCityList] = useState([]);
 
   const validateClient = () => {
     const errors = {};
@@ -255,6 +264,35 @@ const CreateClient = () => {
   };
 
   useEffect(() => {
+    fetchCountries().then(setCountryList).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (!receptorPais) return setStateList([]);
+
+    fetchStates(receptorPais)
+      .then((data) => {
+        setStateList(data);
+        setReceptorState("");
+        setCityList([]);
+        setReceptorCity("");
+      })
+      .catch(console.error);
+  }, [receptorPais]);
+
+  useEffect(() => {
+    if (!receptorPais || !receptorState) return setCityList([]);
+
+    fetchCities(receptorPais, receptorState)
+      .then((cities) => {
+        console.log("Ciudades recibidas:", cities);
+        setCityList(cities || []);
+        setReceptorCity("");
+      })
+      .catch(console.error);
+  }, [receptorPais, receptorState]);
+
+  useEffect(() => {
     validateForm();
   }, [receptores, nombre, apellido, telefono, email, disableSaveClient]);
 
@@ -355,37 +393,52 @@ const CreateClient = () => {
               <p className="error">{receptorErrors.receptorDireccion}</p>
             )}
             <div className="form-par">
-              <Input
-                label="Ciudad"
-                placeholder="Ciudad"
-                value={receptorCity}
-                inputText={receptorCity}
-                onChange={(e) => setReceptorCity(e.target.value)}
+              <Select
+                label="País"
+                placeholder="Selecciona un país"
+                value={receptorPais}
+                onChange={(e) => setReceptorPais(e.target.value)}
+                options={countryList.map((c) => ({
+                  value: c.id,
+                  label: c.name,
+                }))}
               />
-              {receptorErrors.receptorCity && (
-                <p className="error">{receptorErrors.receptorCity}</p>
+              {receptorErrors.receptorPais && (
+                <p className="error">{receptorErrors.receptorPais}</p>
               )}
-              <Input
-                label="Estatado/Provincia"
-                placeholder="Estatado/Provincia"
-                value={receptorState}
-                inputText={receptorState}
-                onChange={(e) => setReceptorState(e.target.value)}
-              />
+
+              {stateList.length > 0 && (
+                <Select
+                  label="Estado/Provincia"
+                  placeholder="Selecciona un estado"
+                  value={receptorState}
+                  onChange={(e) => setReceptorState(e.target.value)}
+                  options={stateList.map((s) => ({
+                    value: s.id,
+                    label: s.name,
+                  }))}
+                />
+              )}
               {receptorErrors.receptorState && (
                 <p className="error">{receptorErrors.receptorState}</p>
               )}
+
+              {cityList.length > 0 && (
+                <Select
+                  label="Ciudad"
+                  placeholder="Selecciona una ciudad"
+                  value={receptorCity}
+                  onChange={(e) => setReceptorCity(e.target.value)}
+                  options={cityList.map((ci) => ({
+                    value: ci,
+                    label: ci,
+                  }))}
+                />
+              )}
+              {receptorErrors.receptorCity && (
+                <p className="error">{receptorErrors.receptorCity}</p>
+              )}
             </div>
-            <Select
-              label="País"
-              placeholder="Selecciona un país"
-              value={receptorPais}
-              onChange={(e) => setReceptorPais(e.target.value)}
-              options={countryOptions}
-            />
-            {receptorErrors.receptorPais && (
-              <p className="error">{receptorErrors.receptorPais}</p>
-            )}
             <Button
               onClick={addReceptor}
               text={
